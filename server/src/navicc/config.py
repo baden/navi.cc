@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+versionsring = "0.1"
+
+router = []
+
 
 clients = set()
 rooms = {}

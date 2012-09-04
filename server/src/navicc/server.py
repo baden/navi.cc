@@ -8,10 +8,17 @@ import functools
 sys.path.append(".")
 
 import config
+import base
+import api
+
 logger = config.logger
 
+from tornado import web, ioloop, iostream, escape, options
 
-from tornado import web, ioloop, iostream, escape
+# Перенаправление логов в файл
+# options.options['log_file_prefix'].set('./logs/my_app.log')
+# options.parse_command_line()
+
 #import socket
 #from sockjs.tornado import SockJSRouter, SockJSConnection, proto
 #import json
@@ -20,12 +27,16 @@ import modsockio
 
 """
 """
-class TestHandler(web.RequestHandler):
+
+
+class TestHandler(base.BaseHandler):
+    @web.authenticated
     def get(self, path):
         print 'Test'
         print 'path: %s' % repr(path)
         print 'arguments: %s' % repr(self.request.arguments)
-        self.write('Hello test 5.')
+        user = self.get_secure_cookie("user")
+        self.write('Hello %s.' % user)
 
     def post(self, path):
         print 'Test'
@@ -36,26 +47,7 @@ class TestHandler(web.RequestHandler):
 '''
     Модуль 2. HTTP-управление
 '''
-class BaseHandler(web.RequestHandler):
-    def get_current_user(self):
-        print self.get_secure_cookie("user")
-        return self.get_secure_cookie("user")
 
-class Login(BaseHandler):
-    def get(self):
-        self.write('<html><body><form action="/login" method="post">'
-                   'Name: <input type="text" name="name">'
-                   '<input type="submit" value="Sign in">'
-                   '</form></body></html>')
-
-    def post(self):
-        self.set_secure_cookie("user", self.get_argument("name"))
-        #next = self.get_argument("next")
-        next = self.request.arguments.get("next")
-        if next:
-            self.redirect(next)
-        else:
-            self.redirect("/info/clients")
 
 class ModHTTP(web.RequestHandler):
     def get(self):
@@ -64,7 +56,8 @@ class ModHTTP(web.RequestHandler):
         self.set_header('Content-Type', 'text/plain; charset=UTF-8')
         self.write("Hello, world. ID=%s" % id)
 
-class Clients(BaseHandler):
+
+class Clients(base.BaseHandler):
     @web.authenticated
     def get(self):
         self.set_header('Content-Type', 'application/json; charset=UTF-8')
@@ -83,20 +76,45 @@ class Clients(BaseHandler):
         self.set_secure_cookie('api', 'secret_key')
         self.write(json.dumps(data, indent=2))
 
+
+class Application(web.Application):
+    def __init__(self):
+        handlers = [
+            (r'/point/test(.*)', TestHandler)
+        ] + config.router
+        settings = dict(
+            template_path=os.path.join(os.path.dirname(__file__), "templates"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            # xsrf_cookies=True,
+            cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+            login_url="/auth/login",
+            autoescape=None,
+        )
+        web.Application.__init__(self, handlers, **settings)
+
+        # Единое соединение с базой данных для всех обработчиков
+        self.db = None  # TODO: Пока None
+
 if __name__ == '__main__':
     options = dict()
     if len(sys.argv) > 1:
         options['immediate_flush'] = False
     #EchoRouter = SockJSRouter(ModSock, '/sock', options)    # Модуль 1. Постоянное соединение
-    TestRouter = [('/info/control', ModHTTP), ('/info/clients', Clients), ('/login', Login), (r'/test(.*)', TestHandler)]    # Модуль 2. HTTP управление
+    '''
+    TestRouter = [('/info/control', ModHTTP), ('/info/clients', Clients), (r'/test(.*)', TestHandler)]    # Модуль 2. HTTP управление
     settings = {
+        "template_path": os.path.join(os.path.dirname(__file__), "templates"),
+        "static_path": os.path.join(os.path.dirname(__file__), "static"),
         "cookie_secret": "61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
+        "xsrf_cookies": True,
         "login_url": "/login",
         "headers": {"XOrigin": "me"}
         # 'debug': True
     }
-    app = web.Application(modsockio.EchoRouter.urls + TestRouter, **settings)
+    app = web.Application(modsockio.EchoRouter.urls + TestRouter + config.router, **settings)
     #app = web.Application(TestRouter, **settings)
+    '''
+    app = Application()
     app.listen(8080)
 
     '''
