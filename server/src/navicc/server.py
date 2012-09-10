@@ -9,11 +9,19 @@ sys.path.append(".")
 
 import config
 import base
+from db import getdb
 import api
 
-logger = config.logger
+from callit import *
+import logging
+#import tornado.options
 
-from tornado import web, ioloop, iostream, escape, options
+#logger = config.logger
+
+from tornado import web, ioloop, iostream, escape
+#from tornado import options
+
+import options
 
 # Перенаправление логов в файл
 # options.options['log_file_prefix'].set('./logs/my_app.log')
@@ -21,9 +29,12 @@ from tornado import web, ioloop, iostream, escape, options
 
 #import socket
 #from sockjs.tornado import SockJSRouter, SockJSConnection, proto
-#import json
+import json
+# import pymongo
 
-import modsockio
+from tornado_utils.routes import route
+
+# import modsockio
 
 """
 """
@@ -44,12 +55,11 @@ class TestHandler(base.BaseHandler):
         print 'arguments: %s' % repr(self.request.arguments)
         # При регистрации будет передан идентификатор клиента в regId
 
-'''
-    Модуль 2. HTTP-управление
-'''
-
 
 class ModHTTP(web.RequestHandler):
+    """Модуль 2. HTTP-управление
+    """
+
     def get(self):
         id = self.get_argument('id', '')
         print 'id=', id
@@ -71,34 +81,46 @@ class Clients(base.BaseHandler):
             'name': escape.xhtml_escape(self.current_user),
             'clients': len(config.clients),
             'info': info,
-            'pstats': EchoRouter.stats.dump(),
+            # 'pstats': EchoRouter.stats.dump(),
         }
         self.set_secure_cookie('api', 'secret_key')
         self.write(json.dumps(data, indent=2))
 
 
 class Application(web.Application):
-    def __init__(self):
+    def __init__(self, opts):
         handlers = [
             (r'/point/test(.*)', TestHandler)
-        ] + config.router
+        ] + config.router + route.get_routes()
+        # print ' Application:opts=', repr(opts)
         settings = dict(
             template_path=os.path.join(os.path.dirname(__file__), "templates"),
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             # xsrf_cookies=True,
-            cookie_secret="61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=",
             login_url="/auth/login",
             autoescape=None,
+            **{k: v.value() for k, v in opts.items()}
         )
         web.Application.__init__(self, handlers, **settings)
 
         # Единое соединение с базой данных для всех обработчиков
-        self.db = None  # TODO: Пока None
+        #self.db = base.DB.db(DB_URL, DB_REPLICASET)
+        self.db = getdb(opts.mongodb_url, opts.mongodb_replicaset)
+
+        # Синхронная работа через pymongo
+        # self.syncdb = pymongo.Connection(DB_URL).navicc
+
 
 if __name__ == '__main__':
-    options = dict()
+    opts = options.options()
+    # print 'opts=', repr(opts)
+    # print '  logging=', opts.logging
+    # logging.info('WTF???')
+    '''
+    goptions = dict()
     if len(sys.argv) > 1:
-        options['immediate_flush'] = False
+        goptions['immediate_flush'] = False
+    '''
     #EchoRouter = SockJSRouter(ModSock, '/sock', options)    # Модуль 1. Постоянное соединение
     '''
     TestRouter = [('/info/control', ModHTTP), ('/info/clients', Clients), (r'/test(.*)', TestHandler)]    # Модуль 2. HTTP управление
@@ -114,8 +136,12 @@ if __name__ == '__main__':
     app = web.Application(modsockio.EchoRouter.urls + TestRouter + config.router, **settings)
     #app = web.Application(TestRouter, **settings)
     '''
-    app = Application()
-    app.listen(8080)
+    # start CallIT thread pool (Я правильно понял, что запускается 5 процессов?)
+    #CallIT.start_pool(5)
+
+    app = Application(opts)
+    # tornado.options.parse_command_line()
+    app.listen(opts.port)
 
     '''
     # Модуль 2. Сырой TCP/IP для Магнумов
@@ -144,10 +170,11 @@ if __name__ == '__main__':
     #acallback = functools.partial(moddirtcpip.connection_ready, asock)
     #io_loop.add_handler(asock.fileno(), acallback, io_loop.READ)
 
-    logger.info('Run application')
+    logging.info('Run application')  # logging.info("starting torando web server")
 
     try:
         io_loop.start()
     except KeyboardInterrupt:
+        #CallIT.stop_pool()
         io_loop.stop()
-        logger.info('Exit application')
+        logging.info('Exit application')

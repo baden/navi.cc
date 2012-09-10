@@ -8,17 +8,65 @@ from tornado import gen
 from urllib import quote_plus, unquote_plus
 
 import config
-# import motor
-from db import adb, users
+import motor
 import hashlib
 from tornado.util import b
 import base64
+
+from tornado.ioloop import IOLoop
+#from queue import Queue
+from Queue import Queue
+# import Queue
+from threading import Thread
+from functools import partial
+
+
+class WorkerThread(Thread):
+    def __init__(self, queue):
+        Thread.__init__(self)
+        self.queue = queue
+        self.daemon = True
+        self.start()
+
+    def run(self):
+        while True:
+            func, args, kwargs, callback = self.queue.get()
+            try:
+                result = func(*args, **kwargs)
+                if callback is not None:
+                    IOLoop.instance().add_callback(partial(callback, result))
+            except Exception as e:
+                print(e)
+            self.queue.task_done()
+
+
+class ThreadPool(object):
+    def __init__(self, num_threads):
+        self.queue = Queue()
+        for _ in range(num_threads):
+            WorkerThread(self.queue)
+
+    def add_task(self, func, args=(), kwargs={}, callback=None):
+        self.queue.put((func, args, kwargs, callback))
+
+    def wait_completion(self):
+        self.queue.join()
 
 
 class BaseHandler(tornado.web.RequestHandler):
     @property
     def db(self):
         return self.application.db
+
+    @property
+    def syncdb(self):
+        return self.application.syncdb
+
+    @property
+    def pool(self):
+        if not hasattr(self.application, 'pool'):
+            self.application.pool = ThreadPool(20)
+        return self.application.pool
 
     def get_current_user(self):
         return self.get_secure_cookie("user")
@@ -44,7 +92,7 @@ class GoogleHandler(BaseHandler, tornado.auth.GoogleMixin):
     def _on_auth(self, user):
         if not user:
             raise tornado.web.HTTPError(500, "Google auth failed")
-        exist = yield adb(
+        exist = yield motor.Op(
             self.db['users'].find_one,
             {
                 'method': 'google',
@@ -54,7 +102,7 @@ class GoogleHandler(BaseHandler, tornado.auth.GoogleMixin):
         if exist:   # Пользователь с таким именем уже существует
             result = exist.get('_id', None)
         else:
-            result = yield adb(
+            result = yield motor.Op(
                 self.db['users'].save,
                 {
                     'method': 'google',
@@ -78,7 +126,22 @@ class Login(BaseHandler):
     def get(self):
         # print repr(self.request.arguments)
         next = self.get_argument("next", "/")
-        self.render('login.html', next=quote_plus(next))
+        self.write('<!DOCTYPE html><html><head>'
+                    '<meta charset="utf-8"><title>Login</title>'
+                    '<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.1.0/css/bootstrap-combined.min.css" rel="stylesheet">'
+                    '</head><body>'
+                    '<div class="container"><div class="row"><div class="offset4 span4">'
+                    '<form class="well" action="/auth/login" method="post">'
+                    '<h3>Авторизация</h3>'
+                    '<label>Имя:</label>'
+                    '<input class="span3" placeholder="Введите имя пользователя" type="text" name="name"><br />'
+                    '<label>Пароль:</label>'
+                    '<input class="span3" placeholder="Введите пароль" type="password" name="password">'
+                    '<input type="hidden" name="next" value="%s"><br />'
+                    '<input class="btn" type="submit" value="Sign in"><a href="/auth/login/google?next=%s"><img src="/img/google-icon.png" />Войти через Google-аккаунт</a>'
+                    '</form>'
+                    '</div></div></div>'
+                    '</body></html>' % (quote_plus(next), quote_plus(next)))
 
     @tornado.web.asynchronous
     @gen.engine
@@ -86,7 +149,7 @@ class Login(BaseHandler):
         user = self.get_argument("name")
         password = passhash(self.get_argument("password"))
 
-        exist = yield adb(
+        exist = yield motor.Op(
             self.db['users'].find_one,
             {
                 'method': 'raw',
@@ -101,7 +164,7 @@ class Login(BaseHandler):
                 return
             result = exist.get('_id', None)
         else:
-            result = yield adb(
+            result = yield motor.Op(
                 self.db['users'].save,
                 {
                     'method': 'raw',
@@ -124,3 +187,23 @@ class Login(BaseHandler):
 
 config.router.append(('/auth/login', Login))
 config.router.append(('/auth/login/google', GoogleHandler))
+
+
+class DB():
+    @staticmethod
+    def db(dburl, replicaset=False):
+        db = None  # TODO: Пока None
+        if replicaset:
+            db = motor.MotorReplicaSetConnection(dburl, replicaSet='navicc').open_sync().navicc
+        else:
+            db = motor.MotorConnection(dburl).open_sync().navicc
+
+        # Создадим индексы
+        db.users.ensure_index([
+            ("method", 1),
+            ("user", 1),
+        ], unique=True)
+        #a = db.users.find_one({"method": "raw"})
+        #print ' -init-  a:', repr(a)
+
+        return db

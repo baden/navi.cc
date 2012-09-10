@@ -13,11 +13,12 @@ imeiclients = {}
 rawclients = set()
 rawimeiclients = {}
 
+'''
 import logging
-
 
 # create logger with 'spam_application'
 logger = logging.getLogger('channel')
+
 logger.setLevel(logging.DEBUG)
 
 # create file handler which logs even debug messages
@@ -34,3 +35,4 @@ ch.setFormatter(formatter)
 logger.addHandler(fh)
 logger.addHandler(ch)
 logger.info('Start application')
+'''

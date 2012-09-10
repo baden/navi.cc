@@ -1,0 +1,37 @@
+<div id="top" class="log">
+    События:
+    <ul ng-controller="logController">
+        <table>
+            <thead><tr><th>Дата-время</th><th>Событие</th><th>Дополнительно</th></tr></thead>
+            <tbody>
+                <tr ng-repeat="l in logs">
+                    <td>{{ l.datetime | datetime }}</td><td>{{ l.text }}</td><td>{{ l.comments }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </ul>
+    Конец.
+
+
+</body>
+</html>
+
+<div class="btn-group">
+  <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+    Action
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu" aria-labelledby="dLabel">
+    <li><a tabindex="-1" href="#">Action</a></li>
+    <li><a tabindex="-1" href="#">Another action</a></li>
+    <li><a tabindex="-1" href="#">Something else here</a></li>
+    <li class="divider"></li>
+    <li><a tabindex="-1" href="#">Separated link</a></li>
+  </ul>
+</div>
+
+<div class="dropdown">
+  <!-- Link or button to toggle dropdown -->
+</div>
+</div>
+

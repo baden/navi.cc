@@ -1,0 +1,21 @@
+[
+    {
+        "id": 0,
+        "datetime": 1347294131,
+        "text": "Hello one",
+        "comments": ""
+    },
+    {
+        "id": 1,
+        "datetime": 1347295131,
+        "text": "Hello two",
+        "comments": ""
+    },
+    {
+        "id": 2,
+        "datetime": 1347296131,
+        "text": "Three for all",
+        "comments": "Тревога"
+    }
+]
+

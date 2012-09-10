@@ -1,0 +1,9 @@
+tornado
+tornado_utils
+# pymongo
+greenlet
+git+git://github.com/ajdavis/mongo-python-driver.git@motor
+git+git://github.com/geeknam/python-gcm
+git+git://github.com/mrjoes/sockjs-tornado
+git+git://github.com/andreisavu/mongodb-log
+

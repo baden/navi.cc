@@ -6,15 +6,13 @@ import config
 # from tornado import web
 import json
 from base import BaseHandler
-#import motor
+import motor
 import tornado.web
 from tornado import gen
+from bson import ObjectId
 import time
 import sys
 from tornado_utils.routes import route
-
-from db import adb, users
-
 # from callit import *
 #from time import sleep
 
@@ -37,8 +35,82 @@ def log(s):
         sys.stdout.flush()
 
 
-#config.router.append((, ApiBase))
-@route(r'/api/base(.*)', name='api-base')
+@gen.engine
+def get_user(db, userid, callback):
+    try:
+        user = yield motor.Op(
+                db['users'].find_one,
+                {"_id": ObjectId(userid)}
+            )
+    except Exception, e:
+        callback(None, e)
+        return
+
+    callback(user, None)
+
+
+# config.router.append((r'/api/async/base(.*)', AsyncApiBase))
+@route(r'/api/async/base(.*)', name='async-base')
+class AsyncApiBase(BaseHandler):
+    requred = ()
+    js_pre = ''
+    js_post = ''
+
+    def parcer(self, *args, **kwargs):
+        log('    ApiBase:_parcer:start(args=%s, kwargs=%s)' % (args, kwargs))
+        #sleep(0.5)
+
+        data = {
+            'answer': 'no',
+            'reason': 'base api',
+            'args': repr(args),
+            'kwargs': repr(kwargs)
+        }
+        log('    ApiBase:_parcer:finish')
+        return data
+
+    def api(self, *args, **kwargs):
+        global api_call_counter, api_call_concurent
+        api_call_counter += 1
+        api_call_concurent += 1
+        log('  ApiBase:api:start(args=%s, kwargs=%s)' % (args, kwargs))
+
+        if 'nologin' not in self.requred:
+            log('    start: result = yield motor.Op...')
+            self.user = self.syncdb['users'].find_one({"_id": ObjectId(self.current_user)})
+            log('     done: result = yield motor.Op... [%s]' % repr(self.user))
+
+        answ = self.parcer(*args, **kwargs)
+        answ['api_statistics'] = {
+            'call_counter': api_call_counter,
+            'call_concurent': api_call_concurent
+        }
+        answ['trash'] = [repr(p) for p in self.syncdb['trash'].find({"i": {"$gt": 18, "$lt": 20}})]
+
+        api_call_concurent -= 1
+        log('  ApiBase:api:finish')
+        return answ
+
+    @tornado.web.asynchronous
+    @tornado.gen.engine
+    def get(self, *args, **kwargs):
+        self.set_header('Content-Type', 'application/json; charset=UTF-8')
+        log('ApiBase:get:start(args=%s, kwargs=%s)' % (args, kwargs))
+        #answ = yield tornado.gen.Task(CallIT.gen_run, self.api, *args, **kwargs)
+        answ = yield gen.Task(self.pool.add_task, self.api, *args, **kwargs)
+        callback = self.get_argument('callback', None)
+        if callback:
+            self.write(callback + ' = ' + self.js_pre + json.dumps(answ, indent=2) + self.js_post + "\r")
+        else:
+            self.write(self.js_pre + json.dumps(answ, indent=2) + self.js_post + "\r")
+        self.finish()
+        # self.api(*args, **kwargs)
+        log('ApiBase:get:finish')
+
+    #def post(self, *args, **kwargs):
+    #   self.api(*args, **kwargs)
+
+
 class ApiBase(BaseHandler):
     requred = ()
     js_pre = ''
@@ -72,16 +144,18 @@ class ApiBase(BaseHandler):
         #callback = self.request.arguments.get('callback', None)
         callback = self.get_argument('callback', None)
 
-        # self.current_user = "5049dbb9de72f216d3b8ec9f"
-
         if 'nologin' not in self.requred:
             log('    start: result = yield motor.Op...')
-            #user = yield motor.Op(get_user, self.db, self.current_user)
-            #user = yield adb(users.get_user2, self.db, self.current_user)
-            user = yield adb(users.get_user4, self.db, "5049dbb9de72f216d3b8ec9f")
+            user = yield motor.Op(get_user, self.db, self.current_user)
             if user:
                 self.user = user.get('nickname', u'Ошибка')
 
+            '''
+            self.user = yield motor.Op(
+                self.db['users'].find_one,
+                {"_id": ObjectId(self.current_user)}
+            )
+            '''
             log('     done: result = yield motor.Op... [%s]' % repr(self.user))
 
         answ = yield gen.Task(self.parcer, *args, **kwargs)
@@ -93,15 +167,13 @@ class ApiBase(BaseHandler):
             'call_concurent': api_call_concurent
         }
         answ['user'] = self.user
-        """
-        res = yield adb(
+        res = yield motor.Op(
                 self.db['trash'].find({"i": {"$gt": 18, "$lt": 20}}).to_list
             )
         print ' === res=', repr(res)
         answ['trash'] = [
             repr(p) for p in res
         ]
-        """
         if callback:
             self.write(callback + ' = ' + self.js_pre + json.dumps(answ, indent=2) + self.js_post + "\r")
         else:
@@ -119,8 +191,6 @@ class ApiBase(BaseHandler):
         self.api(*args, **kwargs)
 
 
-#config.router.append((r'/api/version(.*)', Version))
-@route(r'/api/version(.*)', name='api-version')
 class Version(ApiBase):
     # requred = ('nologin')
 
@@ -159,37 +229,7 @@ class Version(ApiBase):
         kwargs["callback"](data)
         #callback(data)
 
-import functools
-
-
-def test_decorator(params):
-    def wrap(method):
-
-        @functools.wraps(method)
-        def wrapper(self, *args, **kwargs):
-            print 'Call test_decorator wrapper: ', repr(params)
-            return method(self, *args, **kwargs)
-        return wrapper
-    return wrap
-
-
-def test_decorator2(method):
-    @functools.wraps(method)
-    def wrapper(self, *args, **kwargs):
-        print 'Call test_decorator2 wrapper: '
-        return method(self, *args, **kwargs)
-    return wrapper
-
-
-@route(r'/api/test(.*)', name='api-test')
-@test_decorator2
-class Test(BaseHandler):
-    @tornado.web.asynchronous
-    @gen.engine
-    def get(self, *args, **kwargs):
-        print 'Call Test:get'
-        self.write("test")
-        self.finish()
-
+config.router.append((r'/api/base(.*)', ApiBase))
+config.router.append((r'/api/version(.*)', Version))
 
 print 'API:Core:import'
