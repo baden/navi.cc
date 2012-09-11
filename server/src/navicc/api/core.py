@@ -77,8 +77,8 @@ class ApiBase(BaseHandler):
         if 'nologin' not in self.requred:
             log('    start: result = yield motor.Op...')
             #user = yield motor.Op(get_user, self.db, self.current_user)
-            #user = yield adb(users.get_user2, self.db, self.current_user)
-            user = yield adb(users.get_user4, self.db, "5049dbb9de72f216d3b8ec9f")
+            user = yield adb(users.get_user4, self.db, self.current_user)
+            #user = yield adb(users.get_user4, self.db, "5049dbb9de72f216d3b8ec9f")
             if user:
                 self.user = user.get('nickname', u'Ошибка')
 

@@ -98,9 +98,13 @@ class Application(web.Application):
             static_path=os.path.join(os.path.dirname(__file__), "static"),
             # xsrf_cookies=True,
             login_url="/auth/login",
-            autoescape=None,
-            **{k: v.value() for k, v in opts.items()}
+            autoescape=None  # ,
+            #**{k: v.value() for k, v in opts.items()}
         )
+        #settings.update(opts)
+        for k, v in opts.items():
+            settings[k] = v.value()
+        print 'settings=', repr(settings)
         web.Application.__init__(self, handlers, **settings)
 
         # Единое соединение с базой данных для всех обработчиков
