@@ -1,6 +1,6 @@
 // This is a module for cloud persistance in mongolab - https://mongolab.com
 var MapModule = angular.module('map', ['ngResource']);
-
+/*
   function initialize() {
         var latlng = new google.maps.LatLng(-34.397, 150.644);
         var myOptions = {
@@ -10,7 +10,27 @@ var MapModule = angular.module('map', ['ngResource']);
         };
     var map = new google.maps.Map(document.getElementById("map_canvas"),
         myOptions);
-  }
+  }*/
+/*
+MapModule.config(function($routeProvider) {
+    log('MapModule:$routeProvider=', $routeProvider);
+    $routeProvider.when('/map', {});
+});
+*/
+
+MapModule.run(function($rootScope) {
+    //log('MapModule.run', $rootScope);
+    $rootScope.$on('$locationChangeSuccess', function($scope, $location, $route){
+        //log('$locationChangeSuccess', $scope, $rootScope, typeof($location), typeof($route));
+        if($location.match(/#\/map/)){
+            //log('==MAP');
+            if(config.map) {
+                google.maps.event.trigger(config.map, 'resize');
+            }
+        }
+    });
+});
+
 
 MapModule.directive('map', function(){
     return {
@@ -32,9 +52,13 @@ MapModule.directive('map', function(){
                     streetViewControl: false,
                     panControl: false
             };
-            var map = new google.maps.Map(element[0],  myOptions);
+            config.map = new google.maps.Map(element[0],  myOptions);
         },
-        template: '<div></div>'
+        template: '<div></div>',
+
+        /*controller: function($scope, $route) {
+            log('== MAP:controller', $scope, $route);
+        }*/
         //templateUrl: 'templates/map.html'
     }
 });

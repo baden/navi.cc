@@ -115,11 +115,15 @@ class Login(BaseHandler):
             raise tornado.web.HTTPError(404)
         else:
             self.set_secure_cookie("user", str(result))
-            next = unquote_plus(self.get_argument("next"))
-            if next:
-                self.redirect(next)
-            else:
-                self.redirect("/")
+            try:
+                next = unquote_plus(self.get_argument("next"))
+                if next:
+                    self.redirect(next)
+                else:
+                    self.redirect("/")
+            except:  # Внешний запрос - вернем 'AUTHENTICATION_SUCCESS'
+                self.write('AUTHENTICATION_SUCCESS')
+                self.finish()
 
 
 config.router.append(('/auth/login', Login))

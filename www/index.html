@@ -103,9 +103,18 @@
           <li ng-class="{active: location.path() == '/report'}">
             <a href="#/report">Отчеты</a>
           </li>
+          <li ng-class="{active: location.path() == '/gps'}">
+            <a href="#/gps">Экспорт GPS</a>
+          </li>
+          <li ng-class="{active: location.path() == '/config'}">
+            <a href="#/config">Настройки</a>
+          </li>
+          <li ng-class="{active: location.path() == '/help'}">
+            <a href="#/help">Помонь</a>
+          </li>
         </ul>
         <ul class="nav pull-right">
-          <li><a href="/auth/logout"><i class="icon-arrow-right"></i> User</a></li>
+          <li><a href="/auth/login?next={{location.absUrl()}}"><i class="icon-arrow-right"></i> User</a></li>
         </ul>
       </div>
     </div>
@@ -114,6 +123,7 @@
         <ng-include src="'/templates/map.html'" ng-class="{hidden: location.path() != '/map'}"></ng-include>
         <ng-include src="'/templates/log.html'" ng-class="{hidden: location.path() != '/log'}"></ng-include>
         <ng-include src="'/templates/report.html'" ng-class="{hidden: location.path() != '/report'}"></ng-include>
+        <ng-include src="'/templates/config.html'" ng-class="{hidden: location.path() != '/config'}"></ng-include>
         <!-- Add your site or application content here -->
         <!--div ng-view></div-->
         <!--
