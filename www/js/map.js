@@ -22,7 +22,7 @@ MapModule.run(function($rootScope) {
     //log('MapModule.run', $rootScope);
     $rootScope.$on('$locationChangeSuccess', function($scope, $location, $route){
         //log('$locationChangeSuccess', $scope, $rootScope, typeof($location), typeof($route));
-        if($location.match(/#\/map/)){
+        if($location.match(/\/map/)){
             //log('==MAP');
             if(config.map) {
                 google.maps.event.trigger(config.map, 'resize');

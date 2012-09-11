@@ -19,6 +19,21 @@ function navigationCtrl($scope, $location) {
 
 }
 
+if(0){
+MainModule.config(function($locationProvider) {
+    //log('$routeProvider=', $routeProvider);
+    log('$locationProvider', $locationProvider);
+    //$locationProvider.html5Mode(true).hashPrefix('!');
+    /*
+    $routeProvider.
+      when('/map', {controller:MapCtrl, templateUrl:'templates/map.html'}).
+      when('/log', {controller:LogsCtrl, templateUrl:'templates/log.html'}).
+      when('/report', {controller:ReportCtrl, templateUrl:'templates/report.html'}).
+      otherwise({redirectTo:'/'});*/
+  });
+}
+
+
 /*
 MainModule.config(function($routeProvider) {
     log('$routeProvider=', $routeProvider);
@@ -151,7 +166,7 @@ MainModule.directive('slist', function() {
       var slist = $scope.slist = [
         {title: 'Opel-Omega AE1856BE', categories:[0,1,2]},
         {title: 'Mercedes SL-300 AA0007AA', categories:[4]},
-        {title: 'Очень длинное название автомобиля', categories:[2]},
+        {title: 'Очень длинное название автомобиля', categories:[2], hint: 'Тут название не влезло'},
         {title: '', hint:'Пустое название автомобиля', categories:[1]}
       ];
       $scope.select = function(s){
@@ -169,10 +184,10 @@ MainModule.directive('slist', function() {
       '<select ng-datasource="categories" ng-selection-change="change">' +
         '<option ng-repeat="c in categories" ng-selected="c.id == selcat">{{ c.title }}</option>' +
       '</select>' +
-      '<select ng-model="selectedItem" ng-options="i.title for i in categories">' +
+      /*'<select ng-model="selectedItem" ng-options="i.title for i in categories">' +
         '<option value="">все</option>' +
       '</select>' +
-      'Выбрано:{{selectedItem}}' +
+      'Выбрано:{{selectedItem}}' +*/
       '<ul class="unstyled">' +
         '<li ng-repeat="s in slist" ng-class="{active:s.selected}" ng-click="select(s)" title="{{ s.hint }}">' +
           '<i class="icon-search"></i>' +
