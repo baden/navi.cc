@@ -131,11 +131,17 @@ class Version(ApiBase):
 
         #data = self.db['trash'].find({"i": {"$gt": 18, "$lt": 20}}).to_list()
         #print ' = == data=', repr(data)
+        self.application.pika.sample_message(self.request)
 
         data = {
             'version': config.versionsring,
             'user': self.user,
             'apisupport': [p[0] for p in config.router if p[0].startswith('/api/')],
+
+            'pika': {
+                'connected': self.application.pika.connected,
+                'message': self.application.pika.get_messages()
+            },
 
             #'path': params,
             'params': self.request.arguments,

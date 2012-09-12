@@ -43,6 +43,15 @@
         <!--script src="js/services.js"></script-->
         <script src="/js/log.js"></script>
         <style>
+        /* Fix bootstrap braking google.maps */
+        .mapCanvas img {
+            width: auto; display:inline;
+            max-width: none;
+        }
+        .mapCanvas label {
+            width: auto; display:inline;
+        }
+
         #map{
             position: absolute;
             top:40px; left:2px; right: 2px; bottom: 2px;

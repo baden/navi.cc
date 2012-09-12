@@ -1,0 +1,5 @@
+{
+    "JavaScript": {
+        "javascriptExtraPaths": ["www/js/vendors", "~/SDK/libs/js"]
+    },
+}

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <title>WebSocket Example</title>
+</head>
+<body>
+    <p>Messages:</p>
+    <div id="messages" style="width:800px;height:300px;overflow:scroll;"></div>
+    <script src="/js/pushstream.js" type="text/javascript" language="javascript" charset="utf-8"></script>
+
+    <script type="text/javascript" language="javascript" charset="utf-8">
+    /*
+function messageReceived(text, id, channel) {
+      document.getElementById('messages').innerHTML += id + ': ' + text + '<br>';
+    };
+
+    var pushstream = new PushStream({
+      host: window.location.hostname,
+      port: 9080,
+      modes: "websocket"
+    });
+    pushstream.onmessage = messageReceived;
+    pushstream.addChannel('ch1');
+    pushstream.addChannel('ch2');
+    pushstream.connect();
+*/
+    if(1){
+        var uuid = '' + new Date().getTime() + '-' + Math.floor(Math.random()*1e6);
+var webSocket = new WebSocket('ws://localhost:9080/ws/ch1/ch2?_=' + uuid);
+
+            webSocket.onopen = function(event) {
+                //alert('onopen');
+                console.log('onopen');
+                //webSocket.send("Hello Web Socket!");
+            };
+
+            webSocket.onmessage = function(event) {
+                console.log('onmessage, ' + event.data);
+                //webSocket.close();
+            };
+
+            webSocket.onclose = function(event) {
+                console.log('onclose');
+            };
+        }
+    </script>
+</body>
+</html>

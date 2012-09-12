@@ -5,6 +5,9 @@ import sys
 import errno
 import functools
 
+from broker import PikaClient
+import pika
+
 sys.path.append(".")
 
 import config
@@ -144,6 +147,13 @@ if __name__ == '__main__':
     #CallIT.start_pool(5)
 
     app = Application(opts)
+
+    # Helper class PikaClient makes coding async Pika apps in tornado easy
+    pc = PikaClient()
+    app.pika = pc  # We want a shortcut for below for easier typing
+    # Set our pika.log options
+    pika.log.setup(color=True)
+
     # tornado.options.parse_command_line()
     app.listen(opts.port)
 
@@ -168,6 +178,9 @@ if __name__ == '__main__':
     #ioloop.PeriodicCallback(EchoConnection.dump_stats, 1000).start()
     #ioloop.IOLoop.instance().start()
     io_loop = ioloop.IOLoop.instance()
+
+    # Add our Pika connect to the IOLoop with a deadline in 0.1 seconds
+    io_loop.add_timeout(time.time() + .1, app.pika.connect)
 
     #callback = functools.partial(modtcpip.connection_ready, sock)
     #io_loop.add_handler(sock.fileno(), callback, io_loop.READ)

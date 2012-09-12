@@ -45,6 +45,16 @@ init_mongodb()
   apt-get install mongodb-10gen -y &> /dev/null
 }
 
+init_rabbitmq()
+{
+  echo "Install rabbitmq-server"
+  echo "deb http://www.rabbitmq.com/debian/ testing main">/etc/apt/sources.list.d/rabbitmq.list
+  wget http://www.rabbitmq.com/rabbitmq-signing-key-public.asc
+  sudo apt-key add rabbitmq-signing-key-public.asc
+  apt-get update &> /dev/null
+  sudo apt-get install rabbitmq-server
+}
+
 init_update
 init_base
 
@@ -60,6 +70,13 @@ if ! builtin type -p mongo &>/dev/null; then
   init_mongodb
 else
   echo "Skip mongoDB install."
+fi
+
+#rabbitmq-server
+if ! builtin type -p rabbitmq-server &>/dev/null; then
+  init_rabbitmq
+else
+  echo "Skip rabbitmq-server install."
 fi
 
 echo "All done OK."

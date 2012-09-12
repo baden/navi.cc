@@ -18,13 +18,15 @@ MapModule.config(function($routeProvider) {
 });
 */
 
+
 MapModule.run(function($rootScope) {
     //log('MapModule.run', $rootScope);
-    $rootScope.$on('$locationChangeSuccess', function($scope, $location, $route){
+
+    $rootScope.$on('$locationChangeSuccess', function($scope, $location, $route) {
         //log('$locationChangeSuccess', $scope, $rootScope, typeof($location), typeof($route));
-        if($location.match(/\/map/)){
+        if ($location.match(/\/map/)) {
             //log('==MAP');
-            if(config.map) {
+            if (config.map) {
                 google.maps.event.trigger(config.map, 'resize');
             }
         }
@@ -32,29 +34,29 @@ MapModule.run(function($rootScope) {
 });
 
 
-MapModule.directive('map', function(){
+MapModule.directive('map', function() {
     return {
         restrict: 'E',
         replace: true,
         transclude: true,
-        link: function($scope, element, attrs, controller){
+        link: function($scope, element, attrs, controller) {
             log('map:link', $scope, element, attrs, controller);
             var latlng = new google.maps.LatLng(48.497, 34.944);
             var myOptions = {
-                    zoom: 11,
-                    center: latlng,
-                    mapTypeId: google.maps.MapTypeId.ROADMAP,
-                    //disableDefaultUI: true
-                    overviewMapControl: true,
-                    scaleControl: false,
-                    rotateControl: false,
-                    zoomControl: false,
-                    streetViewControl: false,
-                    panControl: false
+                zoom: 11,
+                center: latlng,
+                mapTypeId: google.maps.MapTypeId.ROADMAP,
+                //disableDefaultUI: true
+                /*overviewMapControl: true,
+                scaleControl: false,
+                rotateControl: false,
+                zoomControl: false,
+                streetViewControl: false,
+                panControl: false*/
             };
-            config.map = new google.maps.Map(element[0],  myOptions);
+            config.map = new google.maps.Map(element[0], myOptions);
         },
-        template: '<div></div>',
+        template: '<div class="mapCanvas"></div>',
 
         /*controller: function($scope, $route) {
             log('== MAP:controller', $scope, $route);
@@ -64,17 +66,17 @@ MapModule.directive('map', function(){
 });
 
 function MapCtrl($scope) {
-  log('MapCtrl:start', $scope);
-  initialize();
+    log('MapCtrl:start', $scope);
+    initialize();
 }
 
 function LogsCtrl($scope) {
-  log('LogsCtrl:start', $scope);
-  //$scope.body =
+    log('LogsCtrl:start', $scope);
+    //$scope.body =
 }
 
 function ReportCtrl($scope) {
-  log('ReportCtrl:start', $scope);
+    log('ReportCtrl:start', $scope);
 }
 
 //MapModule.controller =
