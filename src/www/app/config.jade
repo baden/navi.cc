@@ -1,0 +1,75 @@
+// data - объект со следующими полями:
+  header - Заголовок окна
+  keys - массив из значений
+
+mixin dialog(data)
+  div.modal.hide(id=data.id, ng-add-system)
+    div.modal-header
+      h1= data.header
+    div.modal-body
+      yield
+    div.modal-footer
+      button.btn.btn-primary(ng-click="add_system_add()") Добавить
+      button.btn.btn-cancel(ng-click="add_system_cancel()") Отменить
+
+mixin list(user)
+  div.modal.hide(id=user.id, ng-add-system)
+    li= user.name
+    li= user.pass
+    li baz
+
+h3 Список систем
+a.btn(ng-popup="config_add_system") Добавить систему
+a.btn(ng-popup="config_add_system2") Добавить систему2
+
+- var config_add_system = {id:"config_add_system2"}
+- config_add_system.header = "Добавление системы"
+
+- params = {id:"config_add_system", title:"Добавление системы1", keys:[]}
+- params.keys.push({click: "add_system_add()", label: "Добавить"})
+- params.keys.push({click: "add_system_cancel()", label: "Отменить"})
+include dialog
+  p Введите IMEI:
+  input(type="text", name="imei", value="000")
+
+
+div#config_add_system2.modal.hide(ng-add-system)
+  div.modal-header
+    h1 Добавление системы2
+  div.modal-body
+    p Введите IMEI:
+    input(type="text", name="imei", value="000")
+  div.modal-footer
+    button.btn.btn-primary(ng-click="add_system_add()") Добавить
+    button.btn.btn-cancel(ng-click="add_system_cancel()") Отменить
+a(ng-popup="/echo/html/") Example Load
+ng-alert(title="Внимание!", text="Что-то произошло", button-text="Я понял", alert-function="okay()")
+  a Example Alert
+ng-confirm(title="Примите решение", action-text="От этого зависит жизнь щеночка. Вы уверены?", action-button-text="Да", action-function="yes()", cancel-button-text="Нет", cancel-function="no()")
+  a Example Confirm
+
+i.icon-resize-vertical.msp
+ul#config_sys_list(ng-sortable, ng-controller="SysConfig")
+  li(ng-repeat="a in $root.api.account.sys_keys", ng-selected="$index == 0", data-skey="{{ a }}")
+    i.msp.icon-hand-up(title="Нажмите и тяните чтобы изменить порядок отображения объектов")
+    i.syspicto.icon-globe(title="Нажмите чтобы задать значок", ng-click="icon(a)")
+    i.systag.icon-tags(title="Нажмите чтобы назначить ярлыки", ng-click="tags(a)")
+    span.sysimei.canselect(title="IMEI") {{ $root.api.account.systems[a].imei }}
+    span.sysphone(title="номер телефона") {{ $root.api.account.systems[a].phone }}
+    i.icon-edit(title="Редактировать описание системы", ng-click="edit(a)")
+    span.sysname.canselect {{ $root.api.account.systems[a].desc }}
+    //span {{ $root.api.account.systems[a] }}
+    span.sysrightcontrol
+      i.systag.icon-off(title="Временно отключить наблюдение за системой", ng-click="onoff(a)")
+      ng-confirm(title="Удаление...", action-text="Вы действительно хотите отказаться от наблюдения за системой <span class=\"label label-info\">{{ $root.api.account.systems[a].desc }}</span>?", action-button-text="Да", action-function="$parent.yes(a)", cancel-button-text="Нет", cancel-function="no()")
+        i.systag.icon-trash(title="Удалить систему из списка наблюдения")
+      i.systag.icon-trash(title="Удалить систему из списка наблюдения (без подтверждения)", ng-click="del(a)")
+
+
+- params = {id:"config_edit_system", title:"Редактирование...", keys:[]}
+- params.keys.push({click: "cancel()", label: "Закрыть"})
+include dialog
+  label Название:
+  input(type="text", name="name", ng-model="current.desc", style="width: 97%")
+  label Номер телефона:
+  input(type="text", name="phone", ng-model="current.phone", style="width: 97%")

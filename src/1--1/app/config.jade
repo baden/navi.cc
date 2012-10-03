@@ -1,0 +1,17 @@
+| Настройки
+h2 Список систем
+a.btn(ng-popup="#config_add_system") Добавить систему
+div#config_add_system.modal.hide(ng-add-system)
+  div.modal-header
+    h1 Добавление системы
+  div.modal-body
+    p Введите IMEI:
+    input(type="text", name="imei", value="000")
+  div.modal-footer
+    button.btn.btn-primary(ng-click="add_system_add()") Добавить
+    button.btn.btn-cancel(ng-click="add_system_cancel()") Отменить
+a(ng-popup="/echo/html/") Example Load
+ng-alert(title="Внимание!", text="Что-то произошло", button-text="Я понял", alert-function="okay()")
+  a Example Alert
+ng-confirm(title="Примите решение", action-text="От этого зависит жизнь щеночка. Вы уверены?", action-button-text="Да", action-function="yes()", cancel-button-text="Нет", cancel-function="no()")
+  a Example Confirm

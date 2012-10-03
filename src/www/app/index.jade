@@ -1,0 +1,100 @@
+!!! 5
+//if lt IE 7
+    html.no-js.lt-ie9.lt-ie8.lt-ie7(lang='en')
+//if IE 7
+    html.no-js.lt-ie9.lt-ie8(lang='en')
+//if IE 8
+    html.no-js.lt-ie9(lang='en')
+//[if gt IE 8]><!
+html.no-js(lang='en', ng-app='gpsModule')
+    //<![endif]
+    head
+        title GPS monitoring
+        meta(charset='utf-8')
+        meta(http-equiv="X-UA-Compatible", content="IE=edge,chrome=1")
+        meta(name='viewport', content='width=device-width', initial-scale='1.0')
+        meta(name='description', content='GPS monitoring')
+        meta(name='author', content='BaDen')
+        //-script(src='javascripts/vendor/modernizr-2.5.3.min.js')
+        link(rel='stylesheet', href='css/jquery-ui.css')
+        link(rel='stylesheet', href='css/select2.css')
+        link(rel='stylesheet', href='css/app.css')
+        //-script(src='http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js')
+        //if lte IE 7
+            script(src='http://cdnjs.cloudflare.com/ajax/libs/json2/20110223/json2.js')
+        //if lte IE 8
+            script(src='//html5shiv.googlecode.com/svn/trunk/html5.js')
+
+        script
+            window.brunch = window.brunch || {};
+            window.brunch['auto-reload'] = {
+                enabled: true
+            };
+        script(type="text/javascript", src="https://maps.google.com/maps/api/js?sensor=false")
+        script(src='js/vendor.js')
+        script(src='js/app.js')
+    body
+        //if lt IE 7
+            p.chromeframe
+                | You are using an outdated browser.
+                a(href="http://browsehappy.com/") Upgrade your browser today
+                | or
+                a(href="http://www.google.com/chromeframe/?redirect=true") install Google Chrome Frame</a> to better experience this site.
+
+        div(ng-controller="navigationCtrl")
+            div.navbar.navbar-fixed-top
+                div.navbar-inner
+                    div.container
+                        a.brand(href="#/") GPS
+                        ul.nav
+                            li(ng-class="{active: location.path() == '/'}")
+                                a(href="#/") Пользователь
+                            li(ng-class="{active: location.path() == '/map'}")
+                                a(href="#/map") Карта
+                            li(ng-class="{active: location.path() == '/log'}")
+                                a(href="#/log") События
+                            li(ng-class="{active: location.path() == '/report'}")
+                                a(href="#/report") Отчеты
+                            li(ng-class="{active: location.path() == '/gps'}")
+                                a(href="#/gps") Экспорт GPS
+                            li(ng-class="{active: location.path().match('/config')}")
+                                a(href="#/config")  Настройки
+                            li.dropdown(ng-class="{active: location.path().match('/config')}")
+                                //div.dropdown
+                                a.dropdown-toggle(data-toggle="#", href="#dropdown"): i.icon-arrow-right
+                                ul.dropdown-menu(role="menu", aria-labelledby="dLabel")
+                                    li: a(href="#/config/domain") Домен
+                                    li: a(href="#/config/user") Пользователь
+                            li(ng-class="{active: location.path() == '/help'}")
+                                a(href="#/help") Help
+                        ul.nav.pull-right
+                          li
+                            a(href="/auth/login?next={{location.absUrl()}}")
+                                i.icon-arrow-right
+                                | Пользователь
+
+        div#tabpagecontent(ng-controller="navigationCtrl")
+            div.tabnoscroll(ng-class="{hidden: location.path() != '/map'}")
+                include map
+            div.tabscroll(ng-class="{hidden: location.path() != '/log'}")
+                include log
+            div.tabscroll(ng-class="{hidden: location.path() != '/report'}")
+                include report
+                //ng-include(src="'/templates/map.html'", ng-class="{hidden: location.path() != '/map'}")
+                //ng-include(src="'/templates/log.html'", ng-class="{hidden: location.path() != '/log'}")
+                //ng-include(src="'/templates/report.html'", ng-class="{hidden: location.path() != '/report'}")
+                //ng-include(src="'/templates/config.html'", ng-class="{hidden: location.path() != '/config'}")
+            div.tabscroll(ng-class="{hidden: location.path() != '/gps'}")
+                include gps
+            div.tabscroll(ng-class="{hidden: location.path() != '/config'}")
+                include config
+            div.tabscroll(ng-class="{hidden: location.path() != '/config/domain'}")
+                p.
+                    В разработке...
+                    Тут будут всевозможные настройки по текущему домену
+            div.tabscroll(ng-class="{hidden: location.path() != '/config/user'}")
+                p.
+                    В разработке...
+                    Тут будут всевозможные личные настройки для пользователя
+            div.tabscroll(ng-class="{hidden: location.path() != '/help'}")
+                include help

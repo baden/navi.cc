@@ -28,3 +28,5 @@ pip-log.txt
 
 # src/var/*
 server/bootstrap.py
+
+tests

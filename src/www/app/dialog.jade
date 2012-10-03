@@ -1,0 +1,9 @@
+//- console.log("dialog:params=", params)
+div.modal.hide(id=params.id, ng-add-system)
+  div.modal-header
+    h1= params.title
+  div.modal-body
+    yield
+  div.modal-footer
+    each k in params.keys
+      button.btn.btn-primary(ng-click="#{k.click}")= k.label

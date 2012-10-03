@@ -1,0 +1,19 @@
+
+<div ng-controller="mapControl">
+  <div ng-class="{minify: !show}" class="map-control">
+    <div ng-controller="sysselect" class="mapsyslist">
+      <select target="tags" ng-model="selecttag" style="width:100%;margin-bottom:0;">
+        <option value="" selected="selected">Все</option>
+        <option value="{{t}}" ng-repeat="t in systems.tags">{{ t }}</option>
+      </select>
+      <ul target="system" class="mapsyslist">
+        <li ng-repeat="a in systems.list | bytag:selecttag" ng-selected="$index == 0"><span class="timecode">Ok</span>{{ a.name }}</li>
+      </ul>
+    </div>
+    <div class="mapcalendar">
+      <div ng-model="date" ui-date="ui-date" regional="ru"></div>
+    </div>
+  </div>
+  <div ng-click="hide()" ng-class="{minify: !show}" class="map-control-hide"><i ng-class="{true: 'icon-chevron-right', false:'icon-chevron-left'}[show]"></i></div>
+  <div ng-class="{minify: !show}" class="map"><map></map></div>
+</div>

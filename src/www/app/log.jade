@@ -1,0 +1,27 @@
+| События
+div(ng-controller="logControl")
+  //div(ng-controller="sysselect")
+  sysselect(ng-selection-change="on_select", test1="123")
+  select(ng-selection-change="on_select()", ng-model="selection")
+    option 1
+    option 2
+    option 3
+  p
+    | Value {{selection}}
+
+  a.btn(ng-click="dont_press()") Не нажимать!!!
+
+  table.table.table-striped.logtable
+    thead
+      tr
+        th Дата/время
+        th Событие
+    tbody
+      tr.tanimation(ng-repeat="l in getlogs(selection)", ui-animate="ui-hide")
+        td
+          a(ng-click="getlogs(selection).del(l)"): i.icon-trash
+          | {{ l.dt }}
+        td {{ l.text }}
+  a.btn.btn-small(ng-click="more()")
+    i.icon-plus
+    | Еще...

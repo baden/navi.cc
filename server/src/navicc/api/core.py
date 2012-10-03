@@ -198,4 +198,18 @@ class Test(BaseHandler):
         self.finish()
 
 
+@route(r'/api/account/info(.*)', name='api-account')
+class ApiAccount(ApiBase):
+    @gen.engine
+    def parcer(self, *args, **kwargs):
+        from tests import data
+        log('   API:account:done')
+        #data = {
+        #    'aa': 1
+        #}
+
+        #settings.set_secure_cookie('api', 'secret_key')
+        kwargs["callback"](data)
+        #callback(data)
+
 print 'API:Core:import'

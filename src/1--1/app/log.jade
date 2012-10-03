@@ -1,0 +1,19 @@
+| События
+div(ng-controller="logControl")
+  //div(ng-controller="sysselect")
+  sysselect
+  p
+    | Value
+
+  table.table.table-striped
+    thead
+      tr
+        th Дата/время
+        th Событие
+    tbody
+      tr.tanimation(ng-repeat="l in logs", ui-animate="ui-hide")
+        td 1
+        td 2
+  a.btn.btn-small(ng-click="more()")
+    i.icon-plus
+    | Еще...

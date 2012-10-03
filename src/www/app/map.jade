@@ -1,0 +1,17 @@
+div(ng-controller="mapControl")
+  div.map-control(ng-class="{minify: !show}")
+    div.mapsyslist(ng-controller="sysselect")
+      select(target="tags", ng-model="selecttag", style="width:100%;margin-bottom:0;")
+        option(value="", selected) Все
+        option(value="{{t}}", ng-repeat="t in systems.tags") {{ t }}
+      ul.mapsyslist(target="system")
+        //li(ng-repeat="a in systems.list | bytag:selecttag", ng-selected="$index == 0")
+        li(ng-repeat="a in $root.api.account.sys_keys")
+          span.timecode Ok
+          | {{ $root.api.account.systems[a].desc }}
+    div.mapcalendar
+      div(ng-model="date", ui-date, regional="ru")
+  div.map-control-hide(ng-click="hide()", ng-class="{minify: !show}")
+    i(ng-class="{true: 'icon-chevron-right', false:'icon-chevron-left'}[show]")
+  div.map(ng-class="{minify: !show}")
+    map

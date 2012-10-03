@@ -19,7 +19,7 @@ init_base()
 {
   echo "Base install..."
   # apt-get install mc python-pip -y
-  apt-get install mc gcc python-setuptools python-software-properties libxml2-dev python-dev -y &> /dev/null
+  apt-get install mc gcc python-setuptools python-software-properties libxml2-dev python-dev python-pip libevent-dev -y &> /dev/null
 }
 
 
@@ -53,6 +53,8 @@ init_rabbitmq()
   sudo apt-key add rabbitmq-signing-key-public.asc
   apt-get update &> /dev/null
   sudo apt-get install rabbitmq-server
+  rabbitmq-plugins enable rabbitmq_management
+  service rabbitms-server restart
 }
 
 init_update
@@ -60,7 +62,8 @@ init_base
 
 # if ! command_exists nginx; then
 if ! builtin type -p nginx &>/dev/null; then
-  init_nginx
+#  init_nginx
+  echo "Nginx must be installed from sources with websocket module
 else
   echo "Skip nginx install."
 fi

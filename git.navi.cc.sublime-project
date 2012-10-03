@@ -1,0 +1,19 @@
+{
+    "folders":
+    [
+        {
+            "path": "/home/baden/SDK/git.navi.cc"
+        },
+        {
+            "path": "/home/baden/SDK/git.navi.cc/www"
+        },
+        {
+            "path": "/home/baden/SDK/git.navi.cc/server"
+        }
+    ],
+    "settings" : {
+        "translate_tabs_to_spaces": true,
+        "tab_size": 4,
+        "use_tab_stops": true
+    }
+}

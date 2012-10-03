@@ -1,0 +1,17 @@
+Настройки
+<h2>Список систем</h2><a ng-popup="#config_add_system" class="btn">Добавить систему</a>
+<div id="config_add_system" ng-add-system="ng-add-system" class="modal hide">
+  <div class="modal-header">
+    <h1>Добавление системы</h1>
+  </div>
+  <div class="modal-body">
+    <p>Введите IMEI:</p>
+    <input type="text" name="imei" value="000"/>
+  </div>
+  <div class="modal-footer">
+    <button ng-click="add_system_add()" class="btn btn-primary">Добавить</button>
+    <button ng-click="add_system_cancel()" class="btn btn-cancel">Отменить</button>
+  </div>
+</div><a ng-popup="/echo/html/">Example Load</a>
+<ng-alert title="Внимание!" text="Что-то произошло" button-text="Я понял" alert-function="okay()"><a>Example Alert</a></ng-alert>
+<ng-confirm title="Примите решение" action-text="От этого зависит жизнь щеночка. Вы уверены?" action-button-text="Да" action-function="yes()" cancel-button-text="Нет" cancel-function="no()"><a>Example Confirm</a></ng-confirm>
