@@ -8,7 +8,7 @@ window.log = () ->
         console.log log_line
 
 nodeCanSelect = (el) ->
-    if el.className and el.className.match('canselect')
+    if el.className and typeof(className) == 'string' and el.className.match('canselect')
         return true
     else
         if el.parentNode
@@ -20,6 +20,7 @@ nodeCanSelect = (el) ->
     #if ev.target.getAttribute and ev.target.getAttribute('canselect')
 
 window.document.onselectstart = (ev) ->
+    #log 'window.document.onselectstart', ev
     if nodeCanSelect(ev.target)
         return true
     else

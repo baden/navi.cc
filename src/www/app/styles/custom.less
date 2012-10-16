@@ -7,6 +7,12 @@ li.dropdown a.dropdown-toggle {
     padding-right: 0px;
 }
 
+i.linkactive {
+    color: #090;
+}
+i.linkpassive {
+    color: #f44;
+}
 
 .mapCanvas {
     width: 100%;
@@ -381,3 +387,36 @@ li.ui-sortable-placeholder2 {
     box-shadow: inset 2px 2px 6px rgba(0, 0, 0, 0.3);
 }
 
+circle {
+  fill: none;
+  stroke-width: 1.5px;
+}
+
+
+div.mymarker {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #F08000;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    background-color: rgba(100,0,0,0.5);
+
+    /*background-image: url(/images/marker-select.png);*/
+    /*-webkit-transition: all 0.1s ease-out;*/
+}
+
+div.mymarker-arrow {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    /*border: 1px solid #F08000;*/
+    /*border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;*/
+
+    background-image: url(/svg/arrow.svg);
+    /*-webkit-transition: all 0.1s ease-out;*/
+    /*z-index: -100;*/
+}

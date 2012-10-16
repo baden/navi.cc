@@ -23,13 +23,45 @@ MapModule.run ["$rootScope", ($rootScope) ->
 ]
 
 MapModule.controller "mapControl", [
-    "$scope", ($scope) ->
+    "$scope"
+    "$rootScope"
+    "Systems"
+    ($scope, $rootScope, Systems) ->
         $scope.show = true
+        $scope.markers = {}
+        $scope.systems = Systems
+        # Systems.systems
+        $scope.name ='misko'
+        log 'Scope=', $scope, Systems, $scope.systems
+        ###
+        $scope.$watch 'name', (newValue, oldValue) ->
+            console.log '====== watch:name:', oldValue, newValue
+
+        ###
+
+        $scope.$watch( "systems", (nv, ov) ->
+                #console.log '****> changed:', nv, ov
+                for k, v of nv.systems
+                    if v.last.point
+                        #console.log 'v=', v.last.point
+                        if not $scope.markers[k]
+                            $scope.markers[k] = new MapMarker(window.config.map)
+                        $scope.markers[k].setPosition(new google.maps.LatLng(v.last.point.lat, v.last.point.lon))
+                        #v.marker = marker
+            true)
+
+        #$scope.$digest()
         $scope.hide = () ->
             $scope.show = !$scope.show
+            $scope.systems.push new google.maps.LatLng(48.5, 34.5)
+            #Systems.systems.push new google.maps.LatLng(48.5, 34.5)
+            $scope.name = 'mikle'
+            #$scope.$digest()
+            console.log 'markers=', $scope.systems
             if config.map
                 setTimeout ( () ->
                     google.maps.event.trigger config.map, 'resize'
+                    console.log '#############-+> mmmap.api', $rootScope.api
                 ), 1000
                 #setTimeout () ->
 ]
@@ -57,7 +89,13 @@ MapModule.directive 'map', () ->
                 streetViewControl: false,
                 panControl: false###
             }
-            config.map = new google.maps.Map element[0], myOptions
+            map = config.map = new google.maps.Map element[0], myOptions
+            console.log 'map=', config.map
+            setTimeout ( () ->
+                console.log 'create-test-marker'
+                marker = window.marker = new MapMarker(map)
+                marker.setPosition(new google.maps.LatLng(48.5, 34.5))
+            ), 1000
         ###
         controller: ["$scope", "$route", ($scope, $route) ->
             log '== MAP:controller', $scope, $route

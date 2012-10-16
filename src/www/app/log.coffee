@@ -3,67 +3,69 @@
 LogModule = angular.module 'log', ['ngResource', 'ui', 'systems']
 #log 'LogModule=', LogModule
 
-LogModule.factory "Logs2", ($resource) ->
-    log 'Logs:constructor'
-    $resource "/api/logs/:id/:action", {},
-        create:
-            method: "PUT"
-
-        saveData:
-            method: "POST"
-
-        toggle:
-            method: "GET"
-            params:
-                action: "toggle"
-
-LogModule.factory "Logs", [
-    "$resource",
-    "$rootScope",
-($resource, $rootScope) ->
-    load = $resource "/api/logs/:skey", {}
-    logs = $rootScope.logs = {}
-    '''
-    i = 0
-    while i < loadList.length
-        data[loadList[i]] = load.get(name: loadList[i])
-        i++
-    '''
-    return (skey) ->
-        log '   get Logs by skey:', skey, load, logs, $rootScope
-        if not skey
-            return []
-        if not logs[skey]
-            #logs[skey] = load.get {skey: skey}
-            logs[skey] = []
-            for i in [1..100]
-                logs[skey].push {
-                    lkey: skey
-                    dt: i
-                    text: "Hello " + skey
-                }
-        logs[skey]
-]
+LogModule.config ($routeProvider) ->
+    log 'LogModule.config ($routeProvider)', $routeProvider
+    $routeProvider.when '/log', {}
+    $routeProvider.when '/log/:skey', {}
 
 LogModule.controller "logControl", [
     "$scope"
     "$rootScope"
-    "Logs"
-($scope, $rootScope, Logs) ->
+    "$route"
+    "$http"
+($scope, $rootScope, $route, $http) ->
     #$scope.mylogs = new Logs
-    $scope.logs = [
-        "1"
-        "2"
-        "3"
-    ]
-    $scope.getlogs = (key) -> Logs(key)
-    log '    $scope.getlogs =', $scope.getlogs, Logs
-    $scope.getlogs2 = (syskey) ->
-        [
-            "1"
-            syskey
-            "3"
-        ]
+    #log '  logControl:$location:$routeParams = ', $location, $routeParams, $route
+    #$scope.route = $route
+    #$scope.params = $routeParams
+    #$route.routes = {
+    #    "/log/(:skey)"
+    #}
+    $scope.logs = []
+    $scope.$on '$locationChangeSuccess', () ->
+        log '$locationChangeSuccess(log) = ', $scope, $route
+        if not $route.current
+            return
+        newkey = $route.current.params.skey
+        if $scope.skey == newkey
+            return
+
+        $scope.skey = newkey
+        if $scope.skey
+            $rootScope.navurl['/log'].attr 'href', '/#/log/' + $scope.skey
+        else
+            $rootScope.navurl['/log'].attr 'href', '/#/log'
+
+        if not $scope.skey
+            $scope.logs = []
+            return
+
+        $http.get('/api/logs/' + $scope.skey + "/" + (new Date()).getTime()).success( (data) ->
+            $scope.logs = data.logs
+        )
+
+        #window.hhhh = $route
+
+        #  $scope, $rootScope, typeof($location), typeof($route)
+        #if $location.match(/\/map/)
+        #    #log '==MAP'
+        #    if config.map
+        #        google.maps.event.trigger config.map, 'resize'
+
+    $scope.dellog = (skey, lkey) ->
+        if not skey
+            return
+        log 'onDel:', skey, lkey, $scope
+        for l of $scope.logs
+            if $scope.logs[l].lkey == lkey
+                log 'found at', l
+                #delete $scope.getlogs2(skey).logs[l]
+                $scope.logs.splice l, 1
+                $http.delete('/api/logs/' + $scope.skey + "/" + (new Date()).getTime()).success( (data) ->
+                    #$scope.logs = data.logs
+                    log 'delete done', data
+                )
+
     $scope.on_select = () ->
         log 'on_select'
 
@@ -72,12 +74,12 @@ LogModule.controller "logControl", [
         log "TODO: Подгрузить записи...", $rootScope
         $scope.logs.push "3"
 
-    $scope.logs = new Logs
+    #$scope.logs = new Logs
 
     $scope.dont_press = () ->
         #$scope.$root.api.$save()
         #a = new Account()
         #a.$save {a:1}
-        $scope.logs.$save({skey:1})
+        #$scope.logs.$save({skey:1})
         log 'oh NOOOOOOOOOOO', $scope.$root
 ]

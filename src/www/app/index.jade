@@ -31,6 +31,9 @@ html.no-js(lang='en', ng-app='gpsModule')
                 enabled: true
             };
         script(type="text/javascript", src="https://maps.google.com/maps/api/js?sensor=false")
+        script(type="text/javascript", src="js/smoothie.js")
+        script(src="http://d3js.org/d3.v2.js")
+        script(src="http://cdn.sockjs.org/sockjs-0.3.min.js")
         script(src='js/vendor.js')
         script(src='js/app.js')
     body
@@ -45,20 +48,22 @@ html.no-js(lang='en', ng-app='gpsModule')
             div.navbar.navbar-fixed-top
                 div.navbar-inner
                     div.container
-                        a.brand(href="#/") GPS
+                        a.brand(href="#/")
+                            | GPS
+                            i(title="{{$root.connect.comment}}", ng-class="{true:'icon-signal linkactive', false:'icon-warning-sign linkpassive'}[$root.connect.connected]")
                         ul.nav
                             li(ng-class="{active: location.path() == '/'}")
-                                a(href="#/") Пользователь
+                                a(href="#/", nav-url="/") Пользователь
                             li(ng-class="{active: location.path() == '/map'}")
-                                a(href="#/map") Карта
-                            li(ng-class="{active: location.path() == '/log'}")
-                                a(href="#/log") События
+                                a(href="#/map", nav-url="/map") Карта
+                            li(ng-class="{active: location.path().match('^/log')}")
+                                a(href="#/log", nav-url="/log") События
                             li(ng-class="{active: location.path() == '/report'}")
-                                a(href="#/report") Отчеты
-                            li(ng-class="{active: location.path() == '/gps'}")
-                                a(href="#/gps") Экспорт GPS
-                            li(ng-class="{active: location.path().match('/config')}")
-                                a(href="#/config")  Настройки
+                                a(href="#/report", nav-url="/report") Отчеты
+                            li(ng-class="{active: location.path().match('^/gps')}")
+                                a(href="#/gps", nav-url="/gps") Экспорт GPS
+                            li(ng-class="{active: location.path().match('^/config')}")
+                                a(href="#/config", nav-url="/config")  Настройки
                             li.dropdown(ng-class="{active: location.path().match('/config')}")
                                 //div.dropdown
                                 a.dropdown-toggle(data-toggle="#", href="#dropdown"): i.icon-arrow-right
@@ -71,12 +76,12 @@ html.no-js(lang='en', ng-app='gpsModule')
                           li
                             a(href="/auth/login?next={{location.absUrl()}}")
                                 i.icon-arrow-right
-                                | Пользователь
+                                | Пользователь {{ pathlog }}
 
         div#tabpagecontent(ng-controller="navigationCtrl")
             div.tabnoscroll(ng-class="{hidden: location.path() != '/map'}")
                 include map
-            div.tabscroll(ng-class="{hidden: location.path() != '/log'}")
+            div.tabscroll(ng-class="{hidden: !location.path().match('^/log')}")
                 include log
             div.tabscroll(ng-class="{hidden: location.path() != '/report'}")
                 include report

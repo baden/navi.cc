@@ -23,5 +23,5 @@ apiModule.factory 'Account', ["$resource", "$rootScope", ($resource, $rootScope)
 
 
 apiModule.run ["$rootScope", ($rootScope) ->
-    log 'apiModule.run', $rootScope
+    #log 'apiModule.run', $rootScope
 ]
