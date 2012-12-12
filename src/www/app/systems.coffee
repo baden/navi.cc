@@ -22,8 +22,8 @@ SystemsModule.factory 'Systems', ["$rootScope", ($rootScope) ->
         #    data.systems.push new google.maps.LatLng(48.5, 34.5)
 
     setInterval ( () ->
-        addRandomMarker()
-    ), 100
+        #addRandomMarker()
+    ), 1000
 
     return data
 ]

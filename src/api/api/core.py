@@ -220,6 +220,21 @@ class ApiAccount(ApiBase):
         #callback(data)
 
 
+@route(r'/api/lasts(.*)', name='api-lasts')
+class ApiLasts(ApiBase):
+    @gen.engine
+    def parcer(self, *args, **kwargs):
+        from random import random
+        data = {}
+        for i in range(1):
+            data[i] = [
+                48.5 + 0.2 * (random() - 0.5),
+                34.95 + 0.4 * (random() - 0.5)
+            ]
+        kwargs["callback"]({"lasts": data})
+        #callback(data)
+
+
 @route(r'/api/logs/(.*)/(.*)', name='api-logs')
 class ApiLogs(ApiBase):
     @gen.engine

@@ -401,7 +401,7 @@ div.mymarker {
     border-radius: 3px;
     -moz-border-radius: 3px;
     -webkit-border-radius: 3px;
-    background-color: rgba(100,0,0,0.5);
+    background-color: rgba(100,200,200,0.5);
 
     /*background-image: url(/images/marker-select.png);*/
     /*-webkit-transition: all 0.1s ease-out;*/
@@ -419,4 +419,21 @@ div.mymarker-arrow {
     background-image: url(/svg/arrow.svg);
     /*-webkit-transition: all 0.1s ease-out;*/
     /*z-index: -100;*/
+}
+
+.stations, .stations svg {
+  position: absolute;
+}
+
+.stations svg {
+  width: 60px;
+  height: 20px;
+  padding-right: 100px;
+  font: 10px sans-serif;
+}
+
+.stations circle {
+  fill: brown;
+  stroke: black;
+  stroke-width: 1.5px;
 }

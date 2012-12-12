@@ -50,6 +50,7 @@ MapModule.controller "mapControl", [
                         #v.marker = marker
             true)
 
+
         #$scope.$digest()
         $scope.hide = () ->
             $scope.show = !$scope.show
@@ -96,6 +97,57 @@ MapModule.directive 'map', () ->
                 marker = window.marker = new MapMarker(map)
                 marker.setPosition(new google.maps.LatLng(48.5, 34.5))
             ), 1000
+
+
+            # Load the station data. When the data comes back, create an overlay.
+            #d3.json "fakeapi/stations.json", (data) ->
+            d3.json "api/lasts.json", (data) ->
+                console.log '==stations.json', data
+                overlay = new google.maps.OverlayView()
+                listener = google.maps.event.addListener(map, 'bounds_changed', () ->
+                    log '+fire bounds_changed', map.getBounds()
+                    count = 0
+                    for k, v of data.lasts
+                        #log 'v=', v
+                        #break
+                        if map.getBounds().contains(new google.maps.LatLng(v[0], v[1]))
+                            count += 1
+                    log 'count = ', count
+                    #setupWeatherMarkers();
+                    #google.maps.event.removeListener(listener)
+                )
+
+                # Add the container when the overlay is added to the map.
+                overlay.onAdd = ->
+                    layer = d3.select(@getPanes().overlayLayer).append("div").attr("class", "stations")
+                    svg = layer.append("svg:svg").attr("class", "marker")
+                    console.log 'svg=', svg
+
+                    # Draw each marker as a separate SVG element.
+                    # We could use a single SVG, but what size would it have?
+                    overlay.draw = ->
+                        # update existing markers
+
+                        # Add a circle.
+
+                        # Add a label.
+                        transform = (d) ->
+                            d = new google.maps.LatLng(d.value[0], d.value[1])
+                            d = projection.fromLatLngToDivPixel(d)
+                            d3.select(this).style("left", (d.x - padding) + "px").style "top", (d.y - padding) + "px"
+                        projection = @getProjection()
+                        padding = 10
+                        marker = layer.selectAll("svg").data(d3.entries(data.lasts)).each(transform).enter().append("svg:svg").each(transform).attr("class", "marker")
+                        marker.append("svg:circle").attr("r", 4.5).attr("cx", padding).attr "cy", padding
+                        marker.append("svg:text").attr("x", padding + 7).attr("y", padding).attr("dy", ".31em").text (d) ->
+                            d.key
+
+
+
+                # Bind our overlay to the map…
+                overlay.setMap map
+
+
         ###
         controller: ["$scope", "$route", ($scope, $route) ->
             log '== MAP:controller', $scope, $route

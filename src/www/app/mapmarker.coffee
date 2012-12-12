@@ -76,8 +76,9 @@ class MapMarker extends google.maps.OverlayView
             div = @div
             div.style.left = divpx.x - 8 + 'px'
             div.style.top = divpx.y - 8 + 'px'
+            #console.log @point
 
-            @arrdiv.setAttribute("style", "-webkit-transform: rotate(" + @point.angle + "deg);z-index:-1;")
+            @arrdiv.setAttribute("style", "-webkit-transform: rotate(" + @point.course + "deg);z-index:-1;")
 
     onRemove: ->
         #@div_.parentNode.removeChild(@div_)
