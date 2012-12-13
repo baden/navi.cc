@@ -1,0 +1,66 @@
+var MarkersOverlay = function(map, data){
+    this.setMap(map);
+    this.data = data;
+};
+
+MarkersOverlay.prototype = new google.maps.OverlayView();
+
+MarkersOverlay.prototype.onAdd = function() {
+    console.log("MarkersOverlay.onAdd");
+    // Create the DIV and set some basic attributes.
+    var div = document.createElement('DIV');
+    div.style.position = "absolute";
+    div.style["-webkit-transform"] = "translateZ(0)";
+    this.getPanes().overlayLayer.appendChild(div);
+
+    this.div_ = div;
+}
+
+MarkersOverlay.prototype.draw = function() {
+    console.log("MarkersOverlay.draw", this.div_);
+    var overlayProjection = this.getProjection();
+    for(i=0; i<this.data.length; i++){
+        var d = this.data[i];
+        var pos = overlayProjection.fromLatLngToDivPixel(new google.maps.LatLng(d.lat, d.lon));
+        if(!d.div) {
+            var div = d.div = document.createElement('DIV');
+            div.setAttribute("class", "lastmarker spritecolor-red sprite-cycling");
+            div.style.position = "absolute";
+            div.style["-webkit-transform"] = "translateZ(0)";
+
+            /*var c = document.createElement('circle');
+            c.setAttribute("r", 20);
+            c.setAttribute("cx", 10);
+            c.setAttribute("cy", 10);
+            div.appendChild(c);*/
+
+            this.div_.appendChild(div);
+        }
+        d.div.style.left = '' + (pos.x - 8) + 'px';
+        d.div.style.top = '' + (pos.y - 8) + 'px';
+    }
+}
+
+
+function initialize() {
+    var latlng = new google.maps.LatLng(48.497, 34.944);
+    var myOptions = {
+        zoom: 11,
+        center: latlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+
+    var div = document.getElementById('map');
+    var map = new google.maps.Map(div, myOptions);
+
+    var data = [];
+    for(var i=0; i<1000; i++){
+        data.push({
+            lat: 48.5 + 0.4 * (Math.random() - 0.5),
+            lon: 34.95 + 0.8 * (Math.random() - 0.5)
+        });
+    }
+
+    var overlay = new MarkersOverlay(map, data);
+
+};

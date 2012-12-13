@@ -1,0 +1,164 @@
+// These are SVG-related namespace URLs
+var SVG = {};
+SVG.ns = "http://www.w3.org/2000/svg";
+SVG.xlinkns = "http://www.w3.org/1999/xlink";
+
+var MarkersOverlay = function(map, data){
+    this.setMap(map);
+    this.data = data;
+    this.to = null;
+    that = this;
+
+    var bch = function() {
+        //console.log("MarkersOverlay.bounds_changed");
+        var count = 0;
+        var bounds = map.getBounds();
+        var max_x = -1e9;
+        var min_x = 1e9;
+        var max_y = -1e9;
+        var min_y = 1e9;
+        for(var i=0; i<data.length; i++){
+            var d = data[i];
+            if(bounds.contains(d.pos)) {
+                count++;
+                max_x = Math.max(max_x, d.x);
+                max_y = Math.max(max_y, d.y);
+                min_x = Math.min(min_x, d.x);
+                min_y = Math.min(min_y, d.y);
+            }
+        }
+        //console.log("MarkersOverlay.bounds_changed", count);
+        //console.log("  minmax", [min_x, min_y, max_x, max_y]);
+        if(count == 0){
+            that.div_.setAttribute("width", '0px');
+            that.div_.setAttribute("height", '0px');
+        } else {
+            for(var i=0; i<data.length; i++){
+                var d = data[i];
+                if(bounds.contains(d.pos)) {
+                    var x = d.x - min_x;
+                    var y = d.y - min_y;
+                    d.div.setAttributeNS(null, 'transform', 'translate(' + (x - 8) + ',' + (y - 8) + ')');
+                    d.div.style.display = "";
+                } else {
+                    d.div.style.display = "none";
+                }
+            }
+            that.div_.setAttribute("width", '' + (max_x - min_x) + 'px');
+            that.div_.setAttribute("height", '' + (max_y - min_y) + 'px');
+            that.div_.style.left = '' + min_x + 'px';
+            that.div_.style.top = '' + min_y + 'px';
+        }
+    }
+
+    google.maps.event.addListener(map, 'bounds_changed', function() {
+        clearTimeout(that.to);
+        that.to = setTimeout(bch, 500);
+    } );
+};
+
+MarkersOverlay.prototype = new google.maps.OverlayView();
+
+MarkersOverlay.prototype.onAdd = function() {
+    console.log("MarkersOverlay.onAdd");
+    // Create the DIV and set some basic attributes.
+    var svg = document.createElementNS(SVG.ns, "svg:svg");
+    svg.style.position = "absolute";
+    svg.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", SVG.xlinkns);
+    svg.setAttribute("width", "500px");
+    svg.setAttribute("height", "500px");
+
+    this.getPanes().overlayLayer.appendChild(svg);
+
+    this.div_ = svg;
+}
+
+
+MarkersOverlay.prototype.draw = function() {
+    console.log("MarkersOverlay.draw", this.div_);
+    console.log("this.bounds", this.map.getBounds());
+    var count = 0;
+    var bounds = this.map.getBounds();
+    //var ne = bounds.getNorthEast();
+    //var sw = bounds.getSouthWest();
+    var overlayProjection = this.getProjection();
+    var max_x = -1e9;
+    var min_x = 1e9;
+    var max_y = -1e9;
+    var min_y = 1e9;
+
+    for(var i=0; i<this.data.length; i++){
+        var d = this.data[i];
+        var pos = overlayProjection.fromLatLngToDivPixel(d.pos);
+        if(!d.div) {
+            var g = d.div = document.createElementNS(SVG.ns, "g");
+
+            var shape = document.createElementNS(SVG.ns, "polyline");
+            shape.setAttributeNS(null, "points", "-7,-11 0,-15 7,-11");
+            shape.setAttributeNS(null, "fill", "none");
+            shape.setAttributeNS(null, "stroke", "black");
+            shape.setAttributeNS(null, "stroke-width", "2px");
+            shape.setAttributeNS(null, 'transform', 'rotate(' + d.course + ')');
+
+            g.appendChild(shape);
+
+            this.div_.appendChild(g);
+        }
+        if(bounds.contains(d.pos)) {
+            count++;
+            max_x = Math.max(max_x, pos.x);
+            max_y = Math.max(max_y, pos.y);
+            min_x = Math.min(min_x, pos.x);
+            min_y = Math.min(min_y, pos.y);
+        }
+        d.x = pos.x;
+        d.y = pos.y;
+    }
+    if(count == 0){
+        this.div_.setAttribute("width", '0px');
+        this.div_.setAttribute("height", '0px');
+    } else {
+        for(var i=0; i<this.data.length; i++){
+            var d = this.data[i];
+            if(bounds.contains(d.pos)) {
+                var x = d.x - min_x;
+                var y = d.y - min_y;
+                d.div.setAttributeNS(null, 'transform', 'translate(' + (x - 8) + ',' + (y - 8) + ')');
+                d.div.style.display = "";
+            } else {
+                d.div.style.display = "none";
+            }
+        }
+        this.div_.setAttribute("width", '' + (max_x - min_x) + 'px');
+        this.div_.setAttribute("height", '' + (max_y - min_y) + 'px');
+        this.div_.style.left = '' + min_x + 'px';
+        this.div_.style.top = '' + min_y + 'px';
+    }
+    /*for(var i=0; i<this.data.length; i++){
+        var d = this.data[i];
+    }*/
+}
+
+
+function initialize() {
+    var latlng = new google.maps.LatLng(48.497, 34.944);
+    var myOptions = {
+        zoom: 11,
+        center: latlng,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+
+    var div = document.getElementById('map');
+    var map = new google.maps.Map(div, myOptions);
+
+    var data = [];
+    for(var i=0; i<20000; i++){
+        data.push({
+            pos: new google.maps.LatLng(48.5 + 0.4 * (Math.random() - 0.5), 34.95 + 0.8 * (Math.random() - 0.5)),
+            course: 360.0 * Math.random()
+        });
+    }
+
+    var overlay = new MarkersOverlay(map, data);
+
+};

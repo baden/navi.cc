@@ -210,10 +210,39 @@ class ApiAccount(ApiBase):
     @gen.engine
     def parcer(self, *args, **kwargs):
         from tests import data
+        from random import random
         log('   API:account:done')
         #data = {
         #    'aa': 1
         #}
+        #data = {}
+        for i in range(1):
+            pass
+            k = "##" + str(i)
+            data["account"]["sys_keys"].append(k)
+            data["account"]["systems"][k] = {
+                "phone": "",
+                "skey": k,
+                "last": {
+                    "point": {
+                        "sats": 10,
+                        "vout": "0.0",
+                        "lat": 48.5 + 0.4 * (random() - 0.5),
+                        "lon": 34.95 + 0.8 * (random() - 0.5),
+                        "vin": "3.49",
+                        "course": 203.50999450683594,
+                        "time": "120913135222",
+                        "speed": "10.9"
+                    }
+                },
+                "key": k,
+                "tags": [],
+                "imei": "353358016206778",
+                "premium": False,
+                "icon": "car",
+                "desc_global": u"Ложная цель",
+                "desc": u"Ложная цель"
+            }
 
         #settings.set_secure_cookie('api', 'secret_key')
         kwargs["callback"](data)
@@ -226,7 +255,7 @@ class ApiLasts(ApiBase):
     def parcer(self, *args, **kwargs):
         from random import random
         data = {}
-        for i in range(1):
+        for i in range(1000):
             data[i] = [
                 48.5 + 0.2 * (random() - 0.5),
                 34.95 + 0.4 * (random() - 0.5)
