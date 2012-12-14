@@ -1,10 +1,10 @@
-# hello, fromlib. (undefined, #undefined)
+# Hello from Yeoman! (undefined, #undefined)
 CACHE MANIFEST
 
-# Time: Sat Dec 15 2012 01:14:41 GMT+0200 (EET)
+# Time: Sat Dec 15 2012 01:42:03 GMT+0200 (EET)
 # This manifest was created by confess.js, http://github.com/jamesgpearce/confess
 #
-# Retrieved URL: http://localhost:3501/#/
+# Retrieved URL: http://localhost:3501/
 # User-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11
 #
 # Config:
@@ -22,12 +22,16 @@ CACHE MANIFEST
 #  configFile: /usr/local/lib/node_modules/yeoman/lib/support/confess.json
 
 CACHE:
+http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js
 http://localhost:3501/app/images/glyphicons-halflings-white.png?1355438223
 http://localhost:3501/app/images/glyphicons-halflings.png?1355438223
+http://localhost:3501/img/glyphicons-halflings-white.png
+http://localhost:3501/img/glyphicons-halflings.png
 http://www.google-analytics.com/ga.js
-scripts/2b662dec.scripts.js
-scripts/vendor/d10639ae.angular.js
-styles/321259da.main.css
+scripts/8ab52a5b.plugins.js
+scripts/d1ec6433.amd-app.js
+scripts/vendor/cf69c6f2.modernizr.min.js
+styles/ffe654d9.main.css
 
 NETWORK:
 *
