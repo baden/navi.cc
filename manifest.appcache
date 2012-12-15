@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# Time: Sat Dec 15 2012 12:02:44 GMT+0200 (EET)
+# Time: Sat Dec 15 2012 13:52:59 GMT+0200 (EET)
 # This manifest was created by confess.js, http://github.com/jamesgpearce/confess
 #
 # Retrieved URL: http://localhost:3501/
@@ -10,7 +10,7 @@ CACHE MANIFEST
 #  task: appcache
 #  userAgent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/535.11 (KHTML, like Gecko) Chrome/17.0.963.12 Safari/535.11
 #  wait: 0
-#  consolePrefix: #
+#  consolePrefix: false
 #  verbose: true
 #  appcache:
 #   urlsFromDocument: true
@@ -22,6 +22,11 @@ CACHE MANIFEST
 #  configFile: /usr/local/lib/node_modules/yeoman/lib/support/confess.json
 
 CACHE:
+
+styles/0b9b6b1f.bootstrap.css
+styles/c67a9f4e.main.css
+scripts/vendor/5f519b60.angular.js
+scripts/fbcdf8de.scripts.js
 img/glyphicons-halflings.png
 img/glyphicons-halflings-white.png
 scripts/fbcdf8de.scripts.js
