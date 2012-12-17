@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script type="text/javascript" src="http://cdn.sockjs.org/sockjs-0.3.1.min.js"></script>
+        <style type="text/css">
+            input[type="text"] { width: 300px; }
+        </style>
+        <script type="text/javascript">
+            'use strict';
+
+            var connection;
+            //var connection2;
+
+            $(function() {
+
+                var channel_servers = [
+                    'new.navi.cc:8070',
+                    'gpsapi05.navi.cc:8070'
+                ];
+
+                function message(text) {
+                    var date = new Date();
+                    $('#messages').prepend($('<li/>').text([
+                        date.getHours(),
+                        date.getMinutes(),
+                        date.getSeconds(),
+                        date.getMilliseconds(),
+                        ' '+text
+                    ].join(':')));
+                }
+
+                function connect() {
+                    //connection = new SockJS('http://' + window.location.host + '/socket', {id:"123"});
+                    //connection = new SockJS('http://new.navi.cc:8070/socket', {id:"123"});
+                    var s = channel_servers[Math.floor(Math.random() * channel_servers.length)];
+                    message('Choose server: ' + s);
+                    connection = new SockJS('http://' + s + '/socket', {id:"123"});
+                    //connection = new SockJS('http://gpsapi00.navi.cc:8070/socket', {id:"123"});
+                    //connection2 = new SockJS('http://gpsapi05.navi.cc:8070/socket', {id:"123"});
+
+                    connection.onopen = function() {
+                        message('Connected.');
+                    };
+
+                    connection.onclose = function() {
+                        message('Connection closed.');
+                        window.setTimeout(connect, 3000);
+                    };
+
+                    connection.onmessage = function(event) {
+                        message('Message:' + event.data);
+                    };
+
+                }
+
+                $('form').submit(function(event) {
+                    event.preventDefault();
+                    var input = $(this).find('input[type="text"]');
+                    connection.send(input.val());
+                    input.val('');
+                });
+
+                connect();
+
+            });
+        </script>
+    </head>
+    <body>
+        <form action=".">
+            <input type="text">
+            <input type="submit" value="»">
+        </form>
+        <ul id="messages"></ul>
+    </body>
+</html>

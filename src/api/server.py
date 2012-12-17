@@ -5,14 +5,19 @@ import sys
 import errno
 import functools
 
-from broker import PikaClient
-import pika
+#from broker import PikaClient
+import zmq
+from zmq.eventloop.ioloop import ZMQPoller
+from zmq.eventloop import ioloop as zqioloop
+#from zmq.eventloop import zmqstream
+import zmqstream
 
 sys.path.append(".")
 
 import config
 import base
-from db import getdb
+#from db import getdb
+from db import DB
 import api
 
 from callit import *
@@ -22,7 +27,10 @@ import logging
 #logger = config.logger
 
 from tornado import web, ioloop, iostream, escape
+#from tornado import web, iostream, escape
 #from tornado import options
+
+#ioloop = zqioloop
 
 import options
 
@@ -112,11 +120,28 @@ class Application(web.Application):
 
         # Единое соединение с базой данных для всех обработчиков
         #self.db = base.DB.db(DB_URL, DB_REPLICASET)
-        self.db = getdb(opts.mongodb_url, opts.mongodb_replicaset)
+        #self.db = getdb(opts.mongodb_url, opts.mongodb_replicaset)
+        self.db = DB(opts.mongodb_url, opts.mongodb_replicaset)
 
         # Синхронная работа через pymongo
         # self.syncdb = pymongo.Connection(DB_URL).navicc
 
+def zmqecho(msg):
+    msg_json = ''.join(msg)
+    print 'Received from Tornado: %s' % msg_json
+    '''
+    msg_data = json.loads(msg_json)
+    msg_id = msg_data['msg_id']
+    response = {
+        'status_code': 200,
+        'status_text': 'OK',
+        'data': 'what up?',
+        'msg_id': msg_id,
+    }
+    response_json = json.dumps(response)
+    print 'Sending back to Tornado: %s' % (response_json)
+    stream.send_multipart(response_json)
+    '''
 
 if __name__ == '__main__':
     opts = options.options()
@@ -149,10 +174,10 @@ if __name__ == '__main__':
     app = Application(opts)
 
     # Helper class PikaClient makes coding async Pika apps in tornado easy
-    pc = PikaClient()
-    app.pika = pc  # We want a shortcut for below for easier typing
+    #pc = PikaClient()
+    #app.pika = pc  # We want a shortcut for below for easier typing
     # Set our pika.log options
-    pika.log.setup(color=True)
+    #pika.log.setup(color=True)
 
     # tornado.options.parse_command_line()
     app.listen(opts.port)
@@ -178,9 +203,21 @@ if __name__ == '__main__':
     #ioloop.PeriodicCallback(EchoConnection.dump_stats, 1000).start()
     #ioloop.IOLoop.instance().start()
     io_loop = ioloop.IOLoop.instance()
+    #io_loop = ioloop.IOLoop(ZMQPoller())
+
+
+    ctx = zmq.Context()
+    s = ctx.socket(zmq.REP)
+    s.bind('ipc://127.0.0.1:5678')
+    stream = zmqstream.ZMQStream(s, io_loop)
+    stream.on_recv(zmqecho)
+
+
+
+    #zloop = ioloop.IOLoop(ZMQPoller())
 
     # Add our Pika connect to the IOLoop with a deadline in 0.1 seconds
-    io_loop.add_timeout(time.time() + .1, app.pika.connect)
+    #io_loop.add_timeout(time.time() + .1, app.pika.connect)
 
     #callback = functools.partial(modtcpip.connection_ready, sock)
     #io_loop.add_handler(sock.fileno(), callback, io_loop.READ)

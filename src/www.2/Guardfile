@@ -1,0 +1,7 @@
+# A sample Guardfile
+# More info at https://github.com/guard/guard#readme
+
+guard 'sprockets', :destination => '_public', :asset_paths => ['app', 'vendor'] do
+  watch (%r{^app/.*}){|m| "app.js" }
+end
+

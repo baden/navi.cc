@@ -9,7 +9,7 @@ from urllib import quote_plus, unquote_plus
 
 import config
 # import motor
-from db import adb, users
+#from db import adb, users
 import hashlib
 from tornado.util import b
 import base64
@@ -48,19 +48,15 @@ class GoogleHandler(BaseHandler, tornado.auth.GoogleMixin):
     def _on_auth(self, user):
         if not user:
             raise tornado.web.HTTPError(500, "Google auth failed")
-        exist = yield adb(
-            self.db['users'].find_one,
-            {
+        exist = self.db.get_user({
                 'method': 'google',
-                'user': user["email"],
-            }
-        )
+                'user': user["email"]
+        })
+        print 'self.db.get_user result =', repr(exist)
         if exist:   # Пользователь с таким именем уже существует
             result = exist.get('_id', None)
         else:
-            result = yield adb(
-                self.db['users'].save,
-                {
+            result = self.db.save_user({
                     'method': 'google',
                     'user': user["email"],
                     'nickname': user["name"],
@@ -69,8 +65,8 @@ class GoogleHandler(BaseHandler, tornado.auth.GoogleMixin):
                     'locale': user["locale"],
                     'first_name': user["first_name"],
                     'last_name': user["last_name"]
-                }
-            )
+            })
+            print 'self.db.save_user result =', repr(result)
         if not result:
             raise tornado.web.HTTPError(404)
         else:

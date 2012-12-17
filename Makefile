@@ -1,6 +1,6 @@
 include version.mk
 
-
+PROJECT_PATH = src/api
 
 #all: www
 all: compile
@@ -14,10 +14,10 @@ compile:
 	echo "Compile..."
 	echo $(CURDIR)
 	#python tools/compile.py
-	python -m compileall -f -l -q servers/gevent-channel-server
-	cp servers/gevent-channel-server/*.pyc ./bin/
-	cp servers/gevent-channel-server/server.key ./bin/
-	cp servers/gevent-channel-server/server.crt ./bin/
+	python -m compileall -f -l -q $(PROJECT_PATH)
+	cp $(PROJECT_PATH)/*.pyc ./build/
+	#cp servers/gevent-channel-server/server.key ./bin/
+	#cp servers/gevent-channel-server/server.crt ./bin/
 	#cd tools
 	#copy2gsmcontrol.org.sh
 	#popd

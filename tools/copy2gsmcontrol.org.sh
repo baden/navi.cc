@@ -6,10 +6,12 @@ echo Копирование проекта на сервер.
 
 #SRC=/backup/arch/
 SRC=..
-DST=baden@gsmcontrol.org:~/new.navi.cc
+DST=baden@magnum8.gsmcontrol.org:~/new.navi.cc
 
 rsync -avz $SRC/src/www/_public/ $DST/www/
 rsync -avz $SRC/etc/gsmcontrol.org/ $DST/etc/
+rsync -avz $SRC/src/api/ $DST/api/ --exclude 'misc'
+rsync -avz $SRC/src/channel/ $DST/channel/ --exclude 'misc'
 
 exit
 

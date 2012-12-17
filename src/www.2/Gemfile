@@ -1,0 +1,11 @@
+source :gemcutter
+
+gem 'sprockets'
+gem 'coffee-script'
+gem 'uglifier'
+gem 'guard-sprockets', :git => "git://github.com/jondot/guard-sprockets.git"
+#gem 'rb-inotify', '~> 0.8.8'
+# Guard Linux dependencies
+gem 'rb-inotify', :require => false if RUBY_PLATFORM =~ /linux/i
+gem 'libnotify', :require => false if RUBY_PLATFORM =~ /linux/i
+

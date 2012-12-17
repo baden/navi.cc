@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import pika
-from pika.adapters.tornado_connection import TornadoConnection
 import tornado.ioloop
 
 

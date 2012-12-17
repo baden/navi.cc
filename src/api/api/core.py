@@ -13,7 +13,7 @@ import time
 import sys
 from tornado_utils.routes import route
 
-from db import adb, users
+#from db import adb, users
 
 # from callit import *
 #from time import sleep
@@ -78,7 +78,9 @@ class ApiBase(BaseHandler):
         if 'nologin' not in self.requred:
             log('    start: result = yield motor.Op...')
             #user = yield motor.Op(get_user, self.db, self.current_user)
-            user = yield adb(users.get_user4, self.db, self.current_user)
+            #user = yield adb(users.get_user4, self.db, self.current_user)
+            user = self.db.get_user_by_id(self.current_user)
+            log('    user: result = %s' % repr(user) )
             #user = yield adb(users.get_user4, self.db, "5049dbb9de72f216d3b8ec9f")
             if user:
                 self.user = user.get('nickname', u'Ошибка')
@@ -94,15 +96,6 @@ class ApiBase(BaseHandler):
             'call_concurent': api_call_concurent
         }
         answ['user'] = self.user
-        """
-        res = yield adb(
-                self.db['trash'].find({"i": {"$gt": 18, "$lt": 20}}).to_list
-            )
-        print ' === res=', repr(res)
-        answ['trash'] = [
-            repr(p) for p in res
-        ]
-        """
         if callback:
             self.write(callback + ' = ' + self.js_pre + json.dumps(answ, indent=2) + self.js_post + "\r")
         else:
@@ -112,18 +105,28 @@ class ApiBase(BaseHandler):
         log('  ApiBase:api:finish')
 
     def get(self, *args, **kwargs):
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
         log('ApiBase:get:start(args=%s, kwargs=%s)' % (args, kwargs))
         self.method = 'get'
         self.api(*args, **kwargs)
         log('ApiBase:get:finish')
 
     def post(self, *args, **kwargs):
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
         self.method = 'post'
         self.api(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
         self.method = 'delete'
         self.api(*args, **kwargs)
+
+    def options(self, *args, **kwargs):
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With')
 
 
 #config.router.append((r'/api/version(.*)', Version))

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html manifest="manifest.appcache" class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+        <title>Персональная система мониторинга транспорта</title>
+        <meta name="author" content="BaDen"/>
+        <meta name="description" content=""/>
+        <meta name="viewport" content="width=device-width" initial-scale="1.0"/>
+        <link rel="stylesheet" href="styles/bootstrap.css"/>
+        <link rel="stylesheet" href="styles/main.css"/>
+
+    </head>
+    <body ng-app="wwwGPSApp">
+
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an outdated browser. <a href="http://browsehappy.com/">Upgrade your browser today</a> or <a href="http://www.google.com/chromeframe/?redirect=true">install Google Chrome Frame</a> to better experience this site.</p>
+        <![endif]-->
+
+        <!--[if lte IE 8]>
+            <script>
+            // The ieshiv takes care of our ui.directives, bootstrap module directives and
+            // AngularJS's ng-view, ng-include, ng-pluralize and ng-switch directives.
+            // However, IF you have custom directives (yours or someone else's) then
+            // enumerate the list of tags in window.myCustomTags
+
+            window.myCustomTags = [ 'yourDirective', 'somebodyElsesDirective' ]; // optional
+            </script>
+            <script src="build/angular-ui-ieshiv.js"></script>
+        <![endif]-->
+
+        <!--[if lt IE 9]>
+            <script src="scripts/vendor/es5-shim.min.js"></script>
+            <script src="scripts/vendor/json3.min.js"></script>
+        <![endif]-->
+
+        <!-- Add your site or application content here -->
+        <div ng-controller="appCtrl">
+            <div class="navbar navbar-fixed-top">
+                <div class="navbar-inner">
+                    <div class="container">
+                        <a href="#/" class="brand">GPS</a>
+                        <ul class="nav">
+                            <li ng-class="{active: location.path().match('^/map')}">
+                                <a href="#/map">Карта</a>
+                            </li>
+                            <li ng-class="{active: location.path().match('^/logs')}">
+                                <a href="#/logs">События</a>
+                            </li>
+                            <li ng-class="{active: location.path().match('^/report')}">
+                                <a href="#/report">Отчеты</a>
+                            </li>
+                            <li ng-class="{active: location.path().match('^/gps')}">
+                                <a href="#/gps">GPS</a>
+                            </li>
+                            <li ng-class="{active: location.path().match('^/config')}">
+                                <a href="#/config">Настройки</a>
+                            </li>
+                            <li ng-class="{active: location.path().match('^/help')}">
+                                <a href="#/help">Помощь</a>
+                            </li>
+                            <li>Location: {{ location.path() }}</li>
+                        </ul>
+                        <ul class="nav pull-right">
+                            <li>
+                                <a href="/auth/login?next={{ location.absURL() }}">
+                                    <i class="icon-arrow-right"></i>Пользователь
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabpagecontent">
+                <div class="tabnoscroll" ng-class="{hidden: !location.path().match('^/map')}">
+                    Тут будет карта
+                </div>
+                <div class="tabscroll" ng-class="{hidden: !location.path().match('^/logs')}">
+                    Тут будут события
+
+                    <div ng-click="doAdd();" class="btn">+</div>
+                    <div style="border: 1px solid blue; width: 200px; height: 200px;"></div>
+                    List
+                    <ul>
+                        <li ng-repeat="l in list">{{ l }}</li>
+                    </ul>
+                    <mylist></mylist>
+                    <mylist2></mylist2>
+                </div>
+                <div class="tabscroll" ng-class="{hidden: !location.path().match('^/report')}">
+                    Тут будут отчеты
+                    <div ng-controller="appCtrl2"><mylist /></div>
+                </div>
+                <div class="tabscroll" ng-class="{hidden: !location.path().match('^/gps')}">
+                    Тут будут подробные данные по GPS
+                </div>
+                <div class="tabscroll" ng-class="{hidden: !location.path().match('^/config')}">
+                    Тут будут управление и настройки систем
+                </div>
+                <div class="tabscroll" ng-class="{hidden: !location.path().match('^/help')}">
+                    Тут будут инструкции
+                </div>
+            </div>
+
+        </div>
+
+        <script src="scripts/vendor/angular.js"></script>
+        <script src="scripts/vendor/angular-resource.js"></script>
+
+        <!-- build:js scripts/scripts.js -->
+        <script src="scripts/app.js"></script>
+        <script src="scripts/controllers/main.js"></script>
+        <script src="scripts/directives/main.js"></script>
+        <!-- endbuild -->
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <!--script>
+            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script-->
+    </body>
+</html>
