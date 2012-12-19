@@ -89,7 +89,7 @@
         strokeWeight: 4,
         scale: 5
       },
-      animation: google.maps.Animation.BOUNCE
+      animation: null // google.maps.Animation.BOUNCE
     });
     window["rabbit"] = rabbit;
     var dt = new Date();
@@ -133,6 +133,7 @@
     var runner = function(){
       if((rabbit_pos==null) || (rabbit_pos>=out2.length)) {
         clearInterval(runner_id);
+        rabbit.setAnimation(null);
         document.getElementById("run").innerHTML = "Запустить!"
         document.getElementById("run").onclick = cmd_run;
         return;
@@ -255,11 +256,13 @@
       //console.log("run", out2);
       clearInterval(runner_id);
       runner_id = setInterval(runner, 1000);
+      rabbit.setAnimation(google.maps.Animation.BOUNCE);
       this.innerHTML = "Остановить."
       this.onclick = cmd_stop;
     };
     var cmd_stop = function() {
       clearInterval(runner_id);
+      rabbit.setAnimation(null);
       this.innerHTML = "Запустить!"
       this.onclick = cmd_run;
     }
