@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <meta name="author" content="BaDen"/>
+  <meta name="description" content=""/>
+  <meta name="viewport" content="width=device-width" initial-scale="1.0"/>
+
+  <style type="text/css">
+    html { height: 100% }
+    body { height: 100%; margin: 0px; padding: 0px }
+    #map_canvas { height: 100% }
+    div.cmdbtnpanel { position: absolute; top: 20px; left: 0; right: 0; text-align: center; }
+    a.cmdbtn { text-decoration: none; color: black; border: 1px solid black; background-color: white; padding: 5px; box-shadow: 1px 1px 6px rgba(0,0,0,0.5);}
+    span.info { color: black; border: 1px solid black; background-color: white; padding: 5px; box-shadow: 1px 1px 6px rgba(0,0,0,0.5);}
+    a.cmdbtn:hover { background-color: #def; }
+  </style>
+  <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false">
+  </script>
+</head>
+<body onload="initialize()">
+  <div id="map_canvas" style="width:100%; height:100%"></div>
+  <div class="cmdbtnpanel">
+    <span class="info">IMEI: <input id="imei" value="test-01"></input></span>
+    <span class="info">
+      <select name="server" id="server" value="http://localhost:8181">
+        <option value="http://localhost:8181">Локальный</option>
+        <option value="http://point.newgps.navi.cc">Боевой</option>
+        <!--option value="http://point.gps.navi.cc">За деньги!!!</option-->
+      </select>
+    </span>
+    <a id="rebuild" class="cmdbtn" href="#">Новый трек</a>
+    <span class="info">Длина трека: <span id="tracklen"></span> </span>
+    <a id="download" class="cmdbtn" href="#">Загрузить...</a>
+    <a id="run" class="cmdbtn" href="#">Запустить!</a>
+  </div>
+  <script type="text/javascript">
+  var directionsDisplay;
+  var directionsService = new google.maps.DirectionsService();
+  window.URL = window.URL || window.webkitURL;
+
+  function initialize() {
+    //var url = "http://point.gps.navi.cc";
+    //var url = "http://point.newgps.navi.cc";
+    //var url = "http://localhost:8181";
+    var IMEI = "test-01";
+
+    document.getElementById("imei").oninput = function(){
+      IMEI = this.value;
+    }
+
+    var FSOURCE = {
+      "SUDDENSTOP": 1,
+      "STOPACC": 2,
+      "TIMESTOPACC": 3,
+      "SLOW": 4,
+      "TIMEMOVE": 5,
+      "START": 6,
+      "TIMESTOP": 7,
+      "ANGLE": 8,
+      "DELTALAT": 9,
+      "DELTALONG": 10,
+      "DELTA": 11,
+      "DU": 12,
+      "UMAX": 13
+    };
+
+    var latlng = new google.maps.LatLng(48.397, 34.644);
+    var myOptions = {
+      zoom: 10,
+      center: latlng,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+    var map = new google.maps.Map(document.getElementById("map_canvas"),
+        myOptions);
+    window["map"] = map;
+    var rabbit = new google.maps.Marker({
+      map: map,
+      position: latlng,
+      title: 'Rabbit',
+      //icon: goldStar,
+      icon: {
+        path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+        fillColor: "yellow",
+        fillOpacity: 0.8,
+        strokeColor: "green",
+        strokeWeight: 4,
+        scale: 5
+      },
+      animation: google.maps.Animation.BOUNCE
+    });
+    window["rabbit"] = rabbit;
+    var dt = new Date();
+
+    var CRC16_CCITT_table = [
+        0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50a5, 0x60c6, 0x70e7, 0x8108, 0x9129, 0xa14a, 0xb16b,
+        0xc18c, 0xd1ad, 0xe1ce, 0xf1ef, 0x1231, 0x0210, 0x3273, 0x2252, 0x52b5, 0x4294, 0x72f7, 0x62d6,
+        0x9339, 0x8318, 0xb37b, 0xa35a, 0xd3bd, 0xc39c, 0xf3ff, 0xe3de, 0x2462, 0x3443, 0x0420, 0x1401,
+        0x64e6, 0x74c7, 0x44a4, 0x5485, 0xa56a, 0xb54b, 0x8528, 0x9509, 0xe5ee, 0xf5cf, 0xc5ac, 0xd58d,
+        0x3653, 0x2672, 0x1611, 0x0630, 0x76d7, 0x66f6, 0x5695, 0x46b4, 0xb75b, 0xa77a, 0x9719, 0x8738,
+        0xf7df, 0xe7fe, 0xd79d, 0xc7bc, 0x48c4, 0x58e5, 0x6886, 0x78a7, 0x0840, 0x1861, 0x2802, 0x3823,
+        0xc9cc, 0xd9ed, 0xe98e, 0xf9af, 0x8948, 0x9969, 0xa90a, 0xb92b, 0x5af5, 0x4ad4, 0x7ab7, 0x6a96,
+        0x1a71, 0x0a50, 0x3a33, 0x2a12, 0xdbfd, 0xcbdc, 0xfbbf, 0xeb9e, 0x9b79, 0x8b58, 0xbb3b, 0xab1a,
+        0x6ca6, 0x7c87, 0x4ce4, 0x5cc5, 0x2c22, 0x3c03, 0x0c60, 0x1c41, 0xedae, 0xfd8f, 0xcdec, 0xddcd,
+        0xad2a, 0xbd0b, 0x8d68, 0x9d49, 0x7e97, 0x6eb6, 0x5ed5, 0x4ef4, 0x3e13, 0x2e32, 0x1e51, 0x0e70,
+        0xff9f, 0xefbe, 0xdfdd, 0xcffc, 0xbf1b, 0xaf3a, 0x9f59, 0x8f78, 0x9188, 0x81a9, 0xb1ca, 0xa1eb,
+        0xd10c, 0xc12d, 0xf14e, 0xe16f, 0x1080, 0x00a1, 0x30c2, 0x20e3, 0x5004, 0x4025, 0x7046, 0x6067,
+        0x83b9, 0x9398, 0xa3fb, 0xb3da, 0xc33d, 0xd31c, 0xe37f, 0xf35e, 0x02b1, 0x1290, 0x22f3, 0x32d2,
+        0x4235, 0x5214, 0x6277, 0x7256, 0xb5ea, 0xa5cb, 0x95a8, 0x8589, 0xf56e, 0xe54f, 0xd52c, 0xc50d,
+        0x34e2, 0x24c3, 0x14a0, 0x0481, 0x7466, 0x6447, 0x5424, 0x4405, 0xa7db, 0xb7fa, 0x8799, 0x97b8,
+        0xe75f, 0xf77e, 0xc71d, 0xd73c, 0x26d3, 0x36f2, 0x0691, 0x16b0, 0x6657, 0x7676, 0x4615, 0x5634,
+        0xd94c, 0xc96d, 0xf90e, 0xe92f, 0x99c8, 0x89e9, 0xb98a, 0xa9ab, 0x5844, 0x4865, 0x7806, 0x6827,
+        0x18c0, 0x08e1, 0x3882, 0x28a3, 0xcb7d, 0xdb5c, 0xeb3f, 0xfb1e, 0x8bf9, 0x9bd8, 0xabbb, 0xbb9a,
+        0x4a75, 0x5a54, 0x6a37, 0x7a16, 0x0af1, 0x1ad0, 0x2ab3, 0x3a92, 0xfd2e, 0xed0f, 0xdd6c, 0xcd4d,
+        0xbdaa, 0xad8b, 0x9de8, 0x8dc9, 0x7c26, 0x6c07, 0x5c64, 0x4c45, 0x3ca2, 0x2c83, 0x1ce0, 0x0cc1,
+        0xef1f, 0xff3e, 0xcf5d, 0xdf7c, 0xaf9b, 0xbfba, 0x8fd9, 0x9ff8, 0x6e17, 0x7e36, 0x4e55, 0x5e74,
+        0x2e93, 0x3eb2, 0x0ed1, 0x1ef0
+    ];
+
+
+    var CRC16 = function(crc, data) {
+      // Compute correct enough :grin: CRC16 CCITT for using in BF2142 auth token """
+      return (((crc << 8) & 0xff00) ^ CRC16_CCITT_table[((crc >> 8) ^ (0xff & data))]);
+    }
+    window["CRC"] = CRC16;
+
+
+    var out2 = [];
+    var rabbit_pos = null;
+    var runner_id;
+    var runner = function(){
+      if((rabbit_pos==null) || (rabbit_pos>=out2.length)) {
+        clearInterval(runner_id);
+        document.getElementById("run").innerHTML = "Запустить!"
+        document.getElementById("run").onclick = cmd_run;
+        return;
+      }
+      var p = out2[rabbit_pos];
+      var lat = p[0];
+      var lon = p[1];
+      var pos = new google.maps.LatLng(lat, lon);
+      //rabbit.position = pos;
+      rabbit.setPosition(pos);
+      //var blob = new Blob();
+      var packet = new ArrayBuffer(32 + 2);
+      var dv = new DataView(packet);
+
+      var lat_s = 0;
+      if(lat < 0) {
+        lat_s = 1;
+        lat = -lat;
+      }
+
+      var lat_i = Math.floor(lat);
+      var lat_f = (lat - lat_i) * 60.0;
+      var lat_t = Math.floor((lat_f - Math.floor(lat_f)) * 10000);
+
+      var lon_s = 0
+      if(lon < 0) {
+        lon_s = 2;
+        lon = -lon;
+      }
+
+      var lon_i = Math.floor(lon);
+      var lon_f = (lon - lon_i) * 60.0;
+      var lon_t = Math.floor((lon_f - Math.floor(lon_f)) * 10000);
+
+// D0: Заголовок (должен быть == 0xFF)
+      dv.setUint8(0, 0xFF);
+// D1: Идентификатор пакета (должен быть == 0xF2)
+      dv.setUint8(1, 0xF2);
+// D2: Длина пакета в байтах, включая HEADER, ID и LENGTH (32)
+      dv.setUint8(2, 32);
+// D3    день    День месяца = 1..31
+      dv.setUint8(3, dt.getUTCDate());
+// D4 месяц | ((год-2010) << 4)   Месяц = 1..12 год = 0..14 → 2010..2024
+      dv.setUint8(4, dt.getUTCMonth()+1 + (dt.getUTCFullYear() - 2010) * 16);
+// D5    Часы    Часы = 0..23
+      dv.setUint8(5, dt.getUTCHours());
+// D6   Минуты  Минуты = 0..59
+      dv.setUint8(6, dt.getUTCMinutes());
+// D7  Cекунды Cекунды = 0..59
+      dv.setUint8(7, dt.getUTCSeconds());
+// D8 Широта (LL) Градусы широты = 0..89
+      dv.setUint8(8, lat_i);
+// D9    Широта (ll) Минуты целая часть = 0..59
+      dv.setUint8(9, Math.floor(lat_f));
+// D10  Широта (mm) Минуты дробная часть1 = 0..99
+      dv.setUint8(10, Math.floor(lat_t / 100));
+// D11 Широта (nn) Минуты дробная часть2 = 0..99
+      dv.setUint8(11, lat_t % 100);
+// D12    Долгота (LLL)   Градусы долготы = 0..179
+      dv.setUint8(12, lon_i);
+// D13   Долгота (ll)    Минуты целая часть = 0..59
+      dv.setUint8(13, Math.floor(lon_f));
+// D14  Долгота (mm)    Минуты дробная часть1 = 0..99
+      dv.setUint8(14, Math.floor(lon_t / 100));
+// D15 Долгота (nn)    Минуты дробная часть2 = 0..99
+      dv.setUint8(15, lon_t % 100);
+// D16    D16.0 = NS  D16.1 = EW  D16.2 = (Course & 1)    D16.0=0 для N   D16.0=1 для S   D16.1=0 для E   D16.1=1 для W   D16.2=0 для четных Course   D16.2=1 для нечетных Course
+      dv.setUint8(16, lat_s + lon_s);
+// D17   Спутники    Кол-во спутников 3..12
+      dv.setUint8(17, Math.floor(Math.random() * 10) + 3);
+// D18  Скорость    Скорость в узлах 0..239
+      dv.setUint8(18, 50);
+// D19 Скорость дробная часть  Дробная часть скорости 0..99
+      dv.setUint8(19, 20);
+// D20    Направление Направление/2 = 0..179
+      dv.setUint8(20, Math.floor(Math.random() * 180));
+// D21   Направление дробная часть   Дробная часть направления 0..99
+      dv.setUint8(21, 0);
+// D22, D23 Напряжение внешнего питания Напряжение/100 = 0..2000    D22 – младшая часть D23 – старшая часть
+      dv.setUint16(22, 1200, true);
+// D24, D25   Напряжение внутреннего аккумулятора Напряжение/100 = 0..5000    D24 – младшая часть D25 – старшая часть
+      dv.setUint16(24, 420, true);
+// D26  Зарезервировано =0
+      dv.setUint8(26, 0);
+// D27 Тип точки   Причина фиксации точки
+      dv.setUint8(27, FSOURCE["ANGLE"]);
+// D28, D29   Неточное смещение   Смещение относительно точного времени в секундах. Значение 0xFFFF означает превышение лимита и должно игнорироваться если это возможно.
+      dv.setUint16(28, 0, true);
+// D30  Зарезервировано =0
+      dv.setUint8(30, 0);
+// D31 Зарезервировано =0
+      dv.setUint8(31, 0);
+
+      var crc = 0;
+      for(var i=0; i<32; i++) {
+        var data = dv.getUint8(i);
+        crc = CRC16(crc, data);
+      }
+      dv.setUint16(32, crc, true);
+
+      var uInt8Array = new Uint8Array(packet);
+
+      var req = new XMLHttpRequest();
+      var url = document.getElementById("server").value;
+      req.open("POST", url + "/bingps?imei=" + IMEI, true);
+      // set headers and mime-type appropriately
+      req.setRequestHeader("Content-Length", 34);
+      req.setRequestHeader('Content-Type', 'application/octet-stream')
+      //req.send(packet);
+      req.send(uInt8Array);
+
+
+      //console.log("step", rabbit_pos, p, IMEI, packet, dv, crc, uInt8Array);
+
+      rabbit_pos += 1;
+      dt.setUTCSeconds(dt.getUTCSeconds()+1);
+    }
+
+    var cmd_run = function() {
+      //console.log("run", out2);
+      clearInterval(runner_id);
+      runner_id = setInterval(runner, 1000);
+      this.innerHTML = "Остановить."
+      this.onclick = cmd_stop;
+    };
+    var cmd_stop = function() {
+      clearInterval(runner_id);
+      this.innerHTML = "Запустить!"
+      this.onclick = cmd_run;
+    }
+
+    document.getElementById("run").onclick = cmd_run;
+
+    //var from = new google.maps.LatLng(48.397, 34.644);
+    //var to = new google.maps.LatLng(47.397, 35.644);
+    directionsDisplay = new google.maps.DirectionsRenderer();
+    directionsDisplay.setMap(map);
+
+    document.getElementById("rebuild").onclick = function() {
+      console.log("rebuild:click");
+
+      var from = new google.maps.LatLng(48.397+(Math.random()-0.5)*6.0, 34.644+(Math.random()-0.5)*16.0);
+      var to = new google.maps.LatLng(48.397+(Math.random()-0.5)*6.0, 34.644+(Math.random()-0.5)*16.0);
+      var request = {
+          origin: from,
+          destination: to,
+          travelMode: google.maps.TravelMode.DRIVING
+      };
+
+      directionsService.route(request, function(result, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+          directionsDisplay.setDirections(result);
+          var path = result.routes[0].overview_path;
+          var leg = result.routes[0].legs[0];
+          console.log("result=", result, path, path.length);
+          clearInterval(runner_id);
+          rabbit_pos = 0;
+          //var blob = new Blob(["onmessage = function(e) { postMessage('msg from worker'); }"]);
+          var out = [];
+          for(var i=0; i<path.length; i++){
+            out.push([path[i].lat(), path[i].lng()]);
+          }
+          console.log("out=", out, out.length);
+
+          out2 = [];
+          for(var i=0; i<leg.steps.length; i++){
+            for(var j=0; j<leg.steps[i].path.length; j++){
+              var p = leg.steps[i].path[j];
+              out2.push([p.lat(), p.lng()]);
+            }
+          }
+          console.log("out2=", out2, out2.length);
+          document.getElementById("tracklen").innerHTML = "" + out2.length;
+
+          rabbit.setPosition(leg.steps[0].path[0]);
+
+          var blob = new Blob([JSON.stringify(out2,false,2)], { type: "text/json" });
+
+          var blobURL = URL.createObjectURL(blob);
+          console.log("blob=", blob, blobURL);
+          document.getElementById("download").href = blobURL;
+        }
+      });
+    };
+  }
+
+  </script>
+</body>
+</html>
