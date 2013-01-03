@@ -17,10 +17,16 @@ var wwwGPSApp = angular.module('wwwGPSApp', []);
 });*/
 
 
+
+
 wwwGPSApp.run(["$rootScope", "$http", function($rootScope, $http){
   $rootScope.account = []
+  /*
   $http.get("http://new.navi.cc:7080/api/account/info.js").success(function(data){
     $rootScope.account = data;
   });
+  */
   console.log("wwwGPSApp:run", $rootScope);
+
 }]);
+

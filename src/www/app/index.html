@@ -10,8 +10,10 @@
         <meta name="author" content="BaDen"/>
         <meta name="description" content=""/>
         <meta name="viewport" content="width=device-width" initial-scale="1.0"/>
-        <link rel="stylesheet" href="styles/bootstrap.css"/>
+        <link id="themecss" rel="stylesheet" href="styles/bootstrap.css">
+        <!--link id="themecss" rel="stylesheet" href="styles/themes/cyborg/bootstrap.css"/-->
         <link rel="stylesheet" href="styles/main.css"/>
+        <script type="text/javascript" src="https://maps.google.com/maps/api/js?sensor=false"></script>
 
     </head>
     <body ng-app="wwwGPSApp">
@@ -42,6 +44,8 @@
             <div class="navbar navbar-fixed-top">
                 <div class="navbar-inner">
                     <div class="container">
+
+<i id="change_theme" class="icon-off"></i>
                         <a href="#/" class="brand">GPS</a>
                         <ul class="nav">
                             <li ng-class="{active: location.path().match('^/map')}">
@@ -76,10 +80,22 @@
             </div>
 
             <div id="tabpagecontent">
+                <div class="tabscroll" ng-class="{hidden: !location.path().match('^/')}">
+                    <div class="span4 offset4">
+                    <form action="#">
+                        <label for="form_username">Пользователь</label>
+                        <input type="text" name="username" id="form_username"></input>
+                        <label for="form_password">Пароль</label>
+                        <input type="password" name="password" id="form_password"></input><br/>
+                        <button class="btn" id="login">Войти</button>
+                    </form>
+                    </div>
+                </div>
                 <div class="tabnoscroll" ng-class="{hidden: !location.path().match('^/map')}">
-                    Тут будет карта
+                    <div gmap="main"></div>
                 </div>
                 <div class="tabscroll" ng-class="{hidden: !location.path().match('^/logs')}">
+                    <!--div gmap="main"></div-->
                     Тут будут события
 
                     <div ng-click="doAdd();" class="btn">+</div>
@@ -107,15 +123,41 @@
             </div>
 
         </div>
+    <!--div id="loading_div" style="/*visibility: hidden;*/ position: absolute; left:0px; top:0px; right:0px; bottom:0px; background-color: grey; /*opacity:0.9*/; font-family: Verdana; font-size: 60px; color: #CCC; display: table-cell; vertical-align: middle; z-index: 2001; text-align: center; line-height: 1em;">
+        Загрузка...
+        <p style="font-size: 22px;">Если длительное время ничего не происходит, попробуйете перезагрузить страницу (F5).</p>
+    </div-->
+
+	<script>
+	(function(window){
+	var themes = ["styles/bootstrap.css", "styles/bootstrap-cyborg.css"];
+	var theme = 0;
+	var document = window.document;
+	document.getElementById('change_theme').onclick = function() {
+	    theme = (theme + 1) % (themes.length);
+	    console.log('click', theme, themes );
+	    document.getElementById('themecss').href = themes[theme];
+	};
+	})(this);
+	</script>
+        <!--script src="scripts/init_start.js"></script-->
 
         <script src="scripts/vendor/angular.js"></script>
         <script src="scripts/vendor/angular-resource.js"></script>
+        <script src="scripts/vendor/sockjs-0.3.min.js"></script>
+        <!--script src="scripts/connect.js"></script-->
 
         <!-- build:js scripts/scripts.js -->
+        <script src="scripts/base.js"></script>
+
         <script src="scripts/app.js"></script>
+        <script src="scripts/factorys/connect.js"></script>
         <script src="scripts/controllers/main.js"></script>
         <script src="scripts/directives/main.js"></script>
+        <script src="scripts/directives/map.js"></script>
         <!-- endbuild -->
+
+        <!--script src="scripts/init_finish.js"></script-->
 
         <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
         <!--script>

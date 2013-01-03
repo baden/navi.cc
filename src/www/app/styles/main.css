@@ -38,3 +38,23 @@ div.tabscroll {
     overflow-x: hidden;
     overflow-y: auto;
 }
+
+div[gmap] {
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+div[gmap] img {
+  max-width: none;
+}
+
+div[gmap] img {
+            width: auto; display:inline;
+            max-width: none;
+        }
+div[gmap] label {
+    width: auto; display:inline;
+}
+

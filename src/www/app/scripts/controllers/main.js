@@ -2,6 +2,7 @@
 
 wwwGPSApp.controller('appCtrl', ["$scope", "$location", function($scope, $location) {
     $scope.location = $location;
+    $scope.last_pos = {lan: 48.0, lon: 35.0};
     $scope.list = [
         'Встать',
         'Сделать',
