@@ -70,9 +70,7 @@
                         </ul>
                         <ul class="nav pull-right">
                             <li>
-                                <a href="/auth/login?next={{ location.absURL() }}">
-                                    <i class="icon-arrow-right"></i>Пользователь
-                                </a>
+                                <a href="#" ng-bind="account.account.title"></a>
                             </li>
                         </ul>
                     </div>
@@ -80,22 +78,18 @@
             </div>
 
             <div id="tabpagecontent">
+                <div ng-view class="container-fluid">Загрузка...</div>
+            </div>
+
+            <!--div id="tabpagecontent" style="display: none;">
                 <div class="tabscroll" ng-class="{hidden: !location.path().match('^/')}">
                     <div class="span4 offset4">
-                    <form action="#">
-                        <label for="form_username">Пользователь</label>
-                        <input type="text" name="username" id="form_username"></input>
-                        <label for="form_password">Пароль</label>
-                        <input type="password" name="password" id="form_password"></input><br/>
-                        <button class="btn" id="login">Войти</button>
-                    </form>
                     </div>
                 </div>
                 <div class="tabnoscroll" ng-class="{hidden: !location.path().match('^/map')}">
                     <div gmap="main"></div>
                 </div>
                 <div class="tabscroll" ng-class="{hidden: !location.path().match('^/logs')}">
-                    <!--div gmap="main"></div-->
                     Тут будут события
 
                     <div ng-click="doAdd();" class="btn">+</div>
@@ -120,13 +114,101 @@
                 <div class="tabscroll" ng-class="{hidden: !location.path().match('^/help')}">
                     Тут будут инструкции
                 </div>
-            </div>
+            </div-->
 
         </div>
     <!--div id="loading_div" style="/*visibility: hidden;*/ position: absolute; left:0px; top:0px; right:0px; bottom:0px; background-color: grey; /*opacity:0.9*/; font-family: Verdana; font-size: 60px; color: #CCC; display: table-cell; vertical-align: middle; z-index: 2001; text-align: center; line-height: 1em;">
         Загрузка...
         <p style="font-size: 22px;">Если длительное время ничего не происходит, попробуйете перезагрузить страницу (F5).</p>
     </div-->
+    <script type="text/ng-template" id="login.html">
+        <div class="loginlabel" ng-class="{hidden: !label}">{{ label }}</div>
+            <div ng-class="{hidden: label}">
+            <div class="container" ng-class="{hidden: account.akey}">
+                Чтобы пользоваться сервисом необходимо авторизоваться в системе.
+                Введите имя пользователя и пароль своей учетной записи.
+                Для создания новой учетной записи придумайте имя пользователя и пароль, учетная запись будет создана автоматически.
+            </div>
+            <div ng-class="{hidden: !account.akey}">
+                <h4>Вы вошли как <i>{{ account.account.title }}</i></h4>
+                <ul>
+                    <li>Имя входа: <b>{{ account.account.name }}</b></li>
+                    <li>Дата регистрации: <b>{{ account.account.date | fromnow }}</b></li>
+                    <li>Права администратора: <b>{{ account.account.admin | yesno }}</b></li>
+                    <li>Наблюдаемых систем: <b>{{ account.account.skeys.length }}</b></li>
+                </ul>
+                <button class="btn" ng-click="onLogout();">Выйти из учетной записи</button>
+                <button class="btn" ng-click="loginform = !loginform;">Войти под другим именем</button>
+            </div>
+            <div class="span4 offset4 loginform" ng-class="{hidden: !loginform && account.akey}">
+                <label>Пользователь</label>
+                <input type="text" placeholder="Введите имя пользователя…" ng-model="account.newusername"></input>
+                <label>Пароль</label>
+                <input type="password" placeholder="Символы не отображаются…" ng-model="account.newpass"></input><br/>
+                <button class="btn btn-primary" ng-class="{hidden: !account.newusername}" id="login" ng-click="onLogin()">Войти</button>
+            </div>
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="map.html">
+        <div style="position: absolute; border: 1px solid blue; top: 0px; bottom: 0px;">
+            Карта
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="logs.html">
+        <div>
+            События
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="reports.html">
+        <div>
+            Отчеты
+        </div>
+    </script>
+
+    <script type="text/ng-template" id="gps.html">
+        <div>
+            Экспорт GPS
+        </div>
+    </script>
+    <script type="text/ng-template" id="config.html">
+        <div>
+            <h4>Список систем</h4>
+            <input type="checkbox" ng-model="deleteenable" title="Удаление систем" style="float:right;"></input>
+            <button class="btn" ng-click="addform=!addform;">Добавить систему</button>
+            <span ng-class="{hidden: !addform}">
+                <label style="display:inline">IMEI</label>
+                <input type="text" style="margin:0" ng-model="newimei"></input>
+                <button class="btn" id="login" ng-click="onAdd(newimei)">Добавить</button>
+            </span>
+            <ul class="config_sys_list" ui-sortable ng-model="account.account.skeys" ng-update="onUpdate()">
+                <li ng-repeat="s in account.account.skeys" ng-class="{off: account.account.systems[s].off}">
+                    <i class="msp icon-hand-up" title="Нажмите и тяните чтобы изменить порядок отображения объектов"></i>
+                    <i class="syspicto icon-globe" title="Нажмите чтобы задать значок" ng-click="icon(a)"></i>
+                    <i class="systag icon-tags" title="Нажмите чтобы назначить ярлыки" ng-click="tags(a)"></i>
+                    <span class="sysimei canselect" title="IMEI">{{ account.account.systems[s].imei }}</span>
+                    <span class="sysphone" title="номер телефона">{{ account.account.systems[s].phone }}</span>
+                    <i class="icon-edit" title="Редактировать описание системы" ng-click="edit(s)"></i>
+                    <span class="sysname canselect">{{ account.account.systems[s].desc }}</span>
+                    <span class="sysrightcontrol">
+                        <i class="systag icon-off" title="Временно отключить наблюдение за системой" ng-click="onoff(s)"></i>
+                        <i class="systag icon-trash" ng-class="{hidden: !deleteenable}" title="Удалить систему из списка наблюдения (без подтверждения)" ng-click="del(s)"></i>
+                    </span>
+                </li>
+            </ul>
+            <ul>
+             <li ng-repeat="s in account.account.skeys">{{ account.account.systems[s].imei }}</li>
+            </ul>
+
+        </div>
+    </script>
+    <script type="text/ng-template" id="help.html">
+        <div>
+            Помощь
+        </div>
+    </script>
 
 	<script>
 	(function(window){
@@ -142,9 +224,15 @@
 	</script>
         <!--script src="scripts/init_start.js"></script-->
 
+        <script src="scripts/vendor/jquery-1.7.2.js"></script>
+        <script src="scripts/vendor/jquery-ui.min.js"></script>
+
         <script src="scripts/vendor/angular.js"></script>
+        <script src="scripts/vendor/angular-ui.js"></script>
         <script src="scripts/vendor/angular-resource.js"></script>
         <script src="scripts/vendor/sockjs-0.3.min.js"></script>
+        <script src="scripts/vendor/moment.min.js"></script>
+        <script src="scripts/vendor/lang/ru.js"></script>
         <!--script src="scripts/connect.js"></script-->
 
         <!-- build:js scripts/scripts.js -->
@@ -166,5 +254,7 @@
             g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
             s.parentNode.insertBefore(g,s)}(document,'script'));
         </script-->
+
+        <script type="text/javascript">angular.bootstrap(document, ['wwwGPSApp']);</script>
     </body>
 </html>

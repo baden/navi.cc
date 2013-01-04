@@ -5,10 +5,7 @@
             "path": "/home/baden/SDK/git.navi.cc"
         },
         {
-            "path": "/home/baden/SDK/git.navi.cc/www"
-        },
-        {
-            "path": "/home/baden/SDK/git.navi.cc/server"
+            "path": "/home/baden/SDK/git.navi.cc/src/www"
         }
     ],
     "settings" : {
